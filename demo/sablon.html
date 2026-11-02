@@ -1,0 +1,335 @@
+<title>İşbirliğim Asistan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Düzen: üstte rol anahtarı; geniş ekranda solda sohbet, sağda "masa" (araç izi + bulunanlar + metin kontrolü); dar ekranda alt alta. */
+:root {
+  --bg: #f7f6fb; --panel: #ffffff; --ink: #1d1a2b; --muted: #6b6680; --line: #e4e1ee;
+  --accent: #6d28d9; --accent-ink: #ffffff; --accent-soft: #efe8fc;
+  --ok: #157f4a; --ok-soft: #e3f4ea; --warn: #9a5b00; --warn-soft: #fbf0dc; --bad: #b42335; --bad-soft: #fbe5e8;
+  --user: #1d1a2b; --user-ink: #f7f6fb;
+  --f-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #13111b; --panel: #1c1928; --ink: #ece9f5; --muted: #a29cb8; --line: #2e2a3f;
+  --accent: #a78bfa; --accent-ink: #160f2b; --accent-soft: #2a2145;
+  --ok: #5fd39a; --ok-soft: #173327; --warn: #f0b85a; --warn-soft: #3a2c12; --bad: #ff8a98; --bad-soft: #3c1820;
+  --user: #ece9f5; --user-ink: #13111b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #13111b; --panel: #1c1928; --ink: #ece9f5; --muted: #a29cb8; --line: #2e2a3f;
+  --accent: #a78bfa; --accent-ink: #160f2b; --accent-soft: #2a2145;
+  --ok: #5fd39a; --ok-soft: #173327; --warn: #f0b85a; --warn-soft: #3a2c12; --bad: #ff8a98; --bad-soft: #3c1820;
+  --user: #ece9f5; --user-ink: #13111b; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.sayfa { max-width: 1240px; margin: 0 auto; padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.marka-adi { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+h1 { font: 700 1.6rem/1.1 var(--f-display); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h1 b { color: var(--accent); font-weight: 700; }
+.alt { color: var(--muted); font-size: .9rem; }
+.rol { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.rol button { border: 0; background: transparent; color: var(--muted); font: 600 .92rem var(--f-body); padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+.rol button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.izgara { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 880px) { .izgara { grid-template-columns: minmax(0, 1fr); } }
+
+.sohbet { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; min-height: 560px; min-width: 0; }
+.akis { flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 68vh; min-height: 320px; }
+.balon { max-width: 88%; padding: 10px 14px; border-radius: 14px; min-width: 0; overflow-wrap: anywhere; }
+.balon.k { align-self: flex-end; background: var(--user); color: var(--user-ink); border-bottom-right-radius: 4px; white-space: pre-wrap; }
+.balon.a { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.balon.a p { margin: 0 0 .6em } .balon.a p:last-child { margin: 0 }
+.balon.a ul, .balon.a ol { margin: .2em 0 .7em; padding-left: 1.3em } .balon.a li { margin: .15em 0 }
+.balon.a h3, .balon.a h4 { font: 600 1rem var(--f-display); margin: .8em 0 .3em }
+.balon.a a { color: var(--accent); }
+.balon.a code { font: .85em var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+.balon.a table { border-collapse: collapse; font-size: .88rem; margin: .4em 0 } .balon.a td, .balon.a th { border: 1px solid var(--line); padding: 4px 8px; text-align: left }
+.tablo-kap { overflow-x: auto; max-width: 100%; }
+.dusunuyor { color: var(--muted); font-style: italic; }
+.not { align-self: center; font-size: .82rem; color: var(--muted); text-align: center; max-width: 52ch; }
+.not.hata { color: var(--bad); }
+
+.oneriler { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 12px; }
+.oneriler button { font: 500 .85rem var(--f-body); color: var(--ink); background: var(--accent-soft); border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; text-align: left; }
+.oneriler button:hover { filter: brightness(0.97); }
+form.yaz { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); align-items: flex-end; }
+form.yaz textarea { flex: 1; min-width: 0; resize: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: var(--r); padding: 10px 12px; font: 15px/1.4 var(--f-body); max-height: 160px; }
+.btn { border: 0; border-radius: var(--r); padding: 10px 16px; font: 600 .92rem var(--f-body); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn.ikincil { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.masa { display: grid; gap: 14px; min-width: 0; }
+.kutu { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+.kutu h2 { font: 600 .78rem var(--f-body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; }
+.iz { display: grid; gap: 6px; font-size: .86rem; }
+.iz-satir { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.iz-ad { font: 500 .8rem var(--f-mono); color: var(--accent); white-space: nowrap; }
+.iz-girdi { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.bos { color: var(--muted); font-size: .88rem; margin: 0; }
+
+.kartlar { display: grid; gap: 8px; }
+.kart { display: grid; grid-template-columns: 38px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.kart:first-child { border-top: 0; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 .95rem var(--f-display); background: var(--accent-soft); color: var(--accent); }
+.kart-ad { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kart-ad a { color: inherit; text-decoration: none; } .kart-ad a:hover { text-decoration: underline; }
+.kart-meta { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dog { color: var(--ok); font-size: .78rem; font-weight: 600; }
+.sayi { font: 500 .82rem var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.sayi small { display: block; color: var(--muted); font-family: var(--f-body); font-size: .72rem; }
+
+.uyum textarea, .uyum input, .uyum select { width: 100%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: var(--r); padding: 9px 11px; font: 14px/1.45 var(--f-body); }
+.uyum textarea { min-height: 92px; resize: vertical; }
+.uyum .satir { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; } .uyum .satir > * { flex: 1 1 140px; }
+.sonuc-ust { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; }
+.rozet { font: 600 .78rem var(--f-body); padding: 3px 10px; border-radius: 999px; }
+.rozet.uygun { background: var(--ok-soft); color: var(--ok); } .rozet.duzeltilmeli { background: var(--warn-soft); color: var(--warn); } .rozet.riskli { background: var(--bad-soft); color: var(--bad); }
+.puan { font: 500 .85rem var(--f-mono); color: var(--muted); }
+.bulgu { border-left: 3px solid var(--line); padding: 4px 0 4px 10px; margin: 8px 0; font-size: .86rem; }
+.bulgu.hata { border-color: var(--bad); } .bulgu.uyari { border-color: var(--warn); } .bulgu.bilgi { border-color: var(--accent); }
+.bulgu b { display: block; } .bulgu span { color: var(--muted); }
+.dipnot { font-size: .75rem; color: var(--muted); margin: 8px 0 0; }
+.durum { font-size: .82rem; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .balon { animation: gel .18s ease-out; } @keyframes gel { from { transform: translateY(4px); opacity: .6 } } }
+</style>
+
+<div class="sayfa">
+  <header>
+    <div class="marka-adi">
+      <h1>İşbirliğim <b>Asistan</b></h1>
+      <span class="alt" id="veri-ozet"></span>
+    </div>
+    <div class="rol" role="group" aria-label="Kimsiniz?">
+      <button type="button" id="rol-marka" data-rol="marka" aria-pressed="true">Markayım</button>
+      <button type="button" id="rol-influencer" data-rol="influencer" aria-pressed="false">Influencer'ım</button>
+    </div>
+  </header>
+
+  <div class="izgara">
+    <section class="sohbet" aria-label="Sohbet">
+      <div class="akis" id="akis" aria-live="polite"></div>
+      <div class="oneriler" id="oneriler"></div>
+      <form class="yaz" id="form">
+        <textarea id="girdi" rows="2" maxlength="4000" placeholder="Sorunuzu yazın…" aria-label="Mesaj"></textarea>
+        <button class="btn ikincil" type="button" id="durdur" hidden>Durdur</button>
+        <button class="btn" type="submit" id="gonder">Gönder</button>
+      </form>
+    </section>
+
+    <aside class="masa">
+      <div class="kutu">
+        <h2>Asistanın çalıştırdığı araçlar</h2>
+        <div class="iz" id="iz"><p class="bos">Asistan veri çektikçe burada görünecek.</p></div>
+      </div>
+      <div class="kutu">
+        <h2 id="kart-baslik">Bulunan influencer'lar</h2>
+        <div class="kartlar" id="kartlar"><p class="bos">Asistan bir arama veya bütçe planı yaptığında profiller burada listelenir.</p></div>
+      </div>
+      <div class="kutu uyum">
+        <h2>Reklam metni kontrolü</h2>
+        <textarea id="uyum-metin" aria-label="Paylaşım metni">Bu çay 1 haftada zayıflatıyor, piyasadaki en iyi çay! İndirim kodu: CAY20 #işbirliği</textarea>
+        <div class="satir">
+          <input id="uyum-marka" placeholder="Marka adı (isteğe bağlı)" aria-label="Marka adı" value="Çaykur Bitki">
+          <select id="uyum-kategori" aria-label="Kategori">
+            <option value="">Kategori seçin</option>
+            <option>Fitness & Sağlık</option><option>Moda & Güzellik</option><option>Yemek & Mutfak</option>
+            <option>Anne & Çocuk</option><option>Yaşam & Lifestyle</option><option>Teknoloji</option>
+          </select>
+        </div>
+        <div id="uyum-sonuc"></div>
+        <p class="dipnot">Yapay zekâ kullanmaz, anında çalışır. Yönetmelik md. 23/A'ya göre ön kontroldür, hukuki görüş değildir.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+/*@@CEKIRDEK@@*/
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const tl = (n) => n == null ? "—" : n.toLocaleString("tr-TR") + " ₺";
+const kTakipci = (n) => n >= 1e6 ? (n / 1e6).toLocaleString("tr-TR", { maximumFractionDigits: 1 }) + " Mn" : n >= 1e3 ? Math.round(n / 1e3) + " B" : String(n);
+
+// --- Küçük, güvenli markdown (önce kaçış, sonra biçim) ---
+function satirIci(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<i>$2</i>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+}
+function md(metin) {
+  const satirlar = metin.replace(/\r/g, "").split("\n");
+  let html = "", liste = null, para = [], tablo = [];
+  const kapat = () => {
+    if (para.length) { html += "<p>" + para.map(satirIci).join("<br>") + "</p>"; para = []; }
+    if (liste) { html += `</${liste}>`; liste = null; }
+    if (tablo.length) {
+      const sat = tablo.filter((r) => !/^\s*\|?\s*:?-{2,}/.test(r)).map((r) => r.trim().replace(/^\||\|$/g, "").split("|").map((c) => satirIci(c.trim())));
+      html += '<div class="tablo-kap"><table>' + sat.map((r, i) => "<tr>" + r.map((c) => i ? `<td>${c}</td>` : `<th>${c}</th>`).join("") + "</tr>").join("") + "</table></div>";
+      tablo = [];
+    }
+  };
+  for (const s of satirlar) {
+    let m;
+    if (/^\s*\|.*\|\s*$/.test(s)) { if (para.length || liste) { const t = tablo; tablo = []; kapat(); tablo = t; } tablo.push(s); continue; }
+    if (tablo.length) kapat();
+    if (!s.trim()) { kapat(); continue; }
+    if ((m = s.match(/^#{1,4}\s+(.*)/))) { kapat(); html += `<h4>${satirIci(m[1])}</h4>`; continue; }
+    if ((m = s.match(/^\s*[-*•]\s+(.*)/)) || (m = s.match(/^\s*\d+[.)]\s+(.*)/))) {
+      const tur = /^\s*\d/.test(s) ? "ol" : "ul";
+      if (para.length) { html += "<p>" + para.map(satirIci).join("<br>") + "</p>"; para = []; }
+      if (liste !== tur) { if (liste) html += `</${liste}>`; html += `<${tur}>`; liste = tur; }
+      html += `<li>${satirIci(m[1])}</li>`; continue;
+    }
+    if (liste) { html += `</${liste}>`; liste = null; }
+    para.push(s);
+  }
+  kapat();
+  return html;
+}
+
+// --- Durum ---
+const durum = { rol: "marka", turlar: { marka: [], influencer: [] }, mesgul: false, ctl: null };
+
+function balon(tur, html) {
+  const d = document.createElement("div");
+  d.className = "balon " + tur;
+  d.innerHTML = html;
+  $("#akis").append(d);
+  $("#akis").scrollTop = $("#akis").scrollHeight;
+  return d;
+}
+function not(metin, hata = false) {
+  const d = document.createElement("div");
+  d.className = "not" + (hata ? " hata" : "");
+  d.textContent = metin;
+  $("#akis").append(d);
+  $("#akis").scrollTop = $("#akis").scrollHeight;
+}
+const KARSILAMA = {
+  marka: "Merhaba! Kampanya brief'i hazırlayabilir, bütçenize ve kategorinize uygun influencer'ları **isbirligim.com.tr verisinden** bulabilir, teklif mesajı yazabilir ve reklam metinlerinizi yönetmeliğe göre kontrol edebilirim. Aşağıdaki örneklerden biriyle başlayabilirsiniz.",
+  influencer: "Merhaba! Profilinizi analiz edip eksikleri gösterebilir, **benzer profillerin fiyatlarına** göre fiyat önerebilir, gelen teklife cevap ve aktif kampanyalara başvuru mesajı yazabilir, caption'larınızı reklam kurallarına göre kontrol edebilirim.",
+};
+function sohbetCiz() {
+  $("#akis").innerHTML = "";
+  balon("a", md(KARSILAMA[durum.rol]));
+  for (const t of durum.turlar[durum.rol]) balon(t.role === "user" ? "k" : "a", t.role === "user" ? esc(t.content) : md(t.content));
+  $("#oneriler").innerHTML = "";
+  for (const s of ORNEK_SORULAR[durum.rol]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = s;
+    b.onclick = () => { $("#girdi").value = s; gonder(); };
+    $("#oneriler").append(b);
+  }
+  $("#girdi").placeholder = durum.rol === "marka" ? "Örn. Ankara'da teknoloji alanında 10 bin TL ile kimlerle çalışabilirim?" : "Örn. 25 bin takipçim var, Reels için ne kadar istemeliyim?";
+}
+for (const b of document.querySelectorAll(".rol button")) {
+  b.onclick = () => {
+    if (durum.mesgul) return;
+    durum.rol = b.dataset.rol;
+    for (const x of document.querySelectorAll(".rol button")) x.setAttribute("aria-pressed", String(x === b));
+    try { localStorage.setItem("isb-rol", durum.rol); } catch {}
+    sohbetCiz();
+  };
+}
+
+// --- Araç izi ve kartlar ---
+let izBos = true;
+function izEkle(ad, girdi, hata) {
+  if (izBos) { $("#iz").innerHTML = ""; izBos = false; }
+  const ozet = Object.entries(girdi || {}).filter(([, v]) => v !== "" && v != null).map(([k, v]) => `${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`).join(", ");
+  const d = document.createElement("div");
+  d.className = "iz-satir";
+  d.innerHTML = `<span class="iz-ad">${esc(ad)}</span><span class="iz-girdi" title="${esc(ozet)}">${esc(hata ? "hata: " + hata : ozet || "—")}</span>`;
+  $("#iz").prepend(d);
+}
+function kartlarCiz(baslik, liste, fiyatAlani) {
+  $("#kart-baslik").textContent = baslik;
+  const k = $("#kartlar");
+  if (!liste?.length) { k.innerHTML = '<p class="bos">Bu ölçütlerle eşleşen profil çıkmadı.</p>'; return; }
+  k.innerHTML = liste.map((i) => {
+    const fiyat = fiyatAlani ? i.fiyat ?? i.fiyatlar?.[fiyatAlani] : (i.fiyatlar?.Reels ?? null);
+    return `<div class="kart">
+      <div class="avatar" aria-hidden="true">${esc((i.ad || "?").trim().charAt(0).toLocaleUpperCase("tr-TR"))}</div>
+      <div style="min-width:0">
+        <div class="kart-ad"><a href="${esc(i.profil_url)}" target="_blank" rel="noopener">${esc(i.ad)}</a> ${i.dogrulanmis ? '<span class="dog">✓ doğrulanmış</span>' : ""}</div>
+        <div class="kart-meta">@${esc(i.kullanici)} · ${esc([i.sehir, (i.kategoriler || []).slice(0, 2).join(", ")].filter(Boolean).join(" · "))}</div>
+      </div>
+      <div class="sayi">${kTakipci(i.takipci)}<small>${fiyat ? tl(fiyat) + " " + esc(fiyatAlani || "Reels") : "fiyat yok"}</small></div>
+    </div>`;
+  }).join("");
+}
+function aracSonucuGoster(ad, girdi, sonuc) {
+  if (!sonuc || sonuc.hata) return;
+  if (ad === "influencer_ara") kartlarCiz(`Bulunan influencer'lar · ${sonuc.toplam_eslesen} eşleşme`, sonuc.sonuclar, girdi?.icerik_turu);
+  if (ad === "butce_plani") kartlarCiz(`Bütçe planı · ${tl(sonuc.harcanan_tl)} / ${tl(sonuc.butce_tl)}`, sonuc.secilenler, sonuc.icerik_turu);
+  if (ad === "profil_analizi") kartlarCiz("Analiz edilen profil", [sonuc.profil]);
+}
+
+// --- Uyum kontrolü (LLM'siz) ---
+const SONUC_ADI = { uygun: "Uygun", duzeltilmeli: "Düzeltilmeli", riskli: "Riskli" };
+function uyumCiz() {
+  const r = uyumKontrol({ metin: $("#uyum-metin").value, reklam_veren: $("#uyum-marka").value, kategori: $("#uyum-kategori").value });
+  $("#uyum-sonuc").innerHTML = `<div class="sonuc-ust"><span class="rozet ${r.sonuc}">${SONUC_ADI[r.sonuc]}</span><span class="puan">${r.puan}/100</span></div>` +
+    (r.bulgular.length ? r.bulgular.map((b) => `<div class="bulgu ${b.seviye}"><b>${esc(b.aciklama)}</b><span>${esc(b.oneri)}</span></div>`).join("") : '<p class="bos">Kural ihlali bulunmadı.</p>');
+}
+for (const id of ["#uyum-metin", "#uyum-marka", "#uyum-kategori"]) $(id).addEventListener("input", uyumCiz);
+$("#uyum-kategori").value = "Fitness & Sağlık";
+uyumCiz();
+
+// --- Gönderme ---
+function mesgulOl(e) {
+  durum.mesgul = e;
+  $("#gonder").disabled = e; $("#girdi").disabled = e; $("#durdur").hidden = !e;
+  for (const b of document.querySelectorAll(".oneriler button, .rol button")) b.disabled = e;
+}
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); gonder(); });
+$("#girdi").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); gonder(); } });
+$("#durdur").onclick = () => durum.ctl?.abort();
+
+async function gonder() {
+  const mesaj = $("#girdi").value.trim();
+  if (!mesaj || durum.mesgul) return;
+  $("#girdi").value = "";
+  const rol = durum.rol, turlar = durum.turlar[rol];
+  turlar.push({ role: "user", content: mesaj });
+  balon("k", esc(mesaj));
+  const b = balon("a", '<span class="dusunuyor">Düşünüyor…</span>');
+  mesgulOl(true);
+  durum.ctl = new AbortController();
+  try {
+    const yanit = await MOTOR.sor({ rol, turlar, signal: durum.ctl.signal,
+      onText: (t) => { b.innerHTML = md(t); $("#akis").scrollTop = $("#akis").scrollHeight; },
+      onArac: (ad, girdi, sonuc) => { izEkle(ad, girdi, sonuc?.hata); aracSonucuGoster(ad, girdi, sonuc); } });
+    b.innerHTML = md(yanit);
+    turlar.push({ role: "assistant", content: yanit });
+  } catch (e) {
+    if (e?.text) { b.innerHTML = md(e.text); turlar.push({ role: "assistant", content: e.text }); } else { b.remove(); }
+    if (e?.code !== "cancelled") not(MOTOR.hataMetni(e), true);
+    if (!e?.text) turlar.pop();
+  } finally {
+    mesgulOl(false);
+    $("#girdi").focus();
+  }
+}
+
+/*@@MOTOR@@*/
+
+try { const r = localStorage.getItem("isb-rol"); if (r === "influencer") $("#rol-influencer").click(); } catch {}
+sohbetCiz();
+MOTOR.baslat?.();
+</script>

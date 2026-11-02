@@ -1,0 +1,107 @@
+{
+ "kaynak": "https://isbirligim.com.tr",
+ "cekilme": "2026-11-02",
+ "tarih": "2026-11-02",
+ "takipciyeGore": [
+  {
+   "ad": "10 binin altı (nano/mikro)",
+   "adet": 243,
+   "reels": 1000,
+   "gonderi": 1000,
+   "hikaye": 500
+  },
+  {
+   "ad": "10–50 bin (mikro)",
+   "adet": 113,
+   "reels": 2500,
+   "gonderi": 2000,
+   "hikaye": 1000
+  },
+  {
+   "ad": "50–100 bin (orta)",
+   "adet": 30,
+   "reels": 5000,
+   "gonderi": 2000,
+   "hikaye": 2000
+  },
+  {
+   "ad": "100 bin ve üzeri",
+   "adet": 31,
+   "reels": 5000,
+   "gonderi": 5000,
+   "hikaye": 2000
+  }
+ ],
+ "kategoriyeGore": [
+  {
+   "ad": "Yaşam & Lifestyle",
+   "adet": 265,
+   "reels": 2000,
+   "gonderi": 1000,
+   "hikaye": 750
+  },
+  {
+   "ad": "Moda & Güzellik",
+   "adet": 250,
+   "reels": 2000,
+   "gonderi": 1000,
+   "hikaye": 750
+  },
+  {
+   "ad": "Yemek & Mutfak",
+   "adet": 180,
+   "reels": 2000,
+   "gonderi": 1000,
+   "hikaye": 700
+  },
+  {
+   "ad": "Seyahat",
+   "adet": 145,
+   "reels": 2000,
+   "gonderi": 1000,
+   "hikaye": 750
+  },
+  {
+   "ad": "Anne & Çocuk",
+   "adet": 134,
+   "reels": 2000,
+   "gonderi": 1000,
+   "hikaye": 500
+  },
+  {
+   "ad": "Fitness & Sağlık",
+   "adet": 93,
+   "reels": 2000,
+   "gonderi": 1500,
+   "hikaye": 1000
+  },
+  {
+   "ad": "Eğitim",
+   "adet": 80,
+   "reels": 1750,
+   "gonderi": 1000,
+   "hikaye": 600
+  },
+  {
+   "ad": "Teknoloji",
+   "adet": 78,
+   "reels": 2000,
+   "gonderi": 1000,
+   "hikaye": 500
+  },
+  {
+   "ad": "Otomotiv",
+   "adet": 26,
+   "reels": 2250,
+   "gonderi": 1500,
+   "hikaye": 500
+  },
+  {
+   "ad": "Gaming",
+   "adet": 25,
+   "reels": 1000,
+   "gonderi": 625,
+   "hikaye": 500
+  }
+ ]
+}

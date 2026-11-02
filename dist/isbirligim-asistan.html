@@ -1,0 +1,784 @@
+<title>İşbirliğim Asistan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Düzen: üstte rol anahtarı; geniş ekranda solda sohbet, sağda "masa" (araç izi + bulunanlar + metin kontrolü); dar ekranda alt alta. */
+:root {
+  --bg: #f7f6fb; --panel: #ffffff; --ink: #1d1a2b; --muted: #6b6680; --line: #e4e1ee;
+  --accent: #6d28d9; --accent-ink: #ffffff; --accent-soft: #efe8fc;
+  --ok: #157f4a; --ok-soft: #e3f4ea; --warn: #9a5b00; --warn-soft: #fbf0dc; --bad: #b42335; --bad-soft: #fbe5e8;
+  --user: #1d1a2b; --user-ink: #f7f6fb;
+  --f-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #13111b; --panel: #1c1928; --ink: #ece9f5; --muted: #a29cb8; --line: #2e2a3f;
+  --accent: #a78bfa; --accent-ink: #160f2b; --accent-soft: #2a2145;
+  --ok: #5fd39a; --ok-soft: #173327; --warn: #f0b85a; --warn-soft: #3a2c12; --bad: #ff8a98; --bad-soft: #3c1820;
+  --user: #ece9f5; --user-ink: #13111b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #13111b; --panel: #1c1928; --ink: #ece9f5; --muted: #a29cb8; --line: #2e2a3f;
+  --accent: #a78bfa; --accent-ink: #160f2b; --accent-soft: #2a2145;
+  --ok: #5fd39a; --ok-soft: #173327; --warn: #f0b85a; --warn-soft: #3a2c12; --bad: #ff8a98; --bad-soft: #3c1820;
+  --user: #ece9f5; --user-ink: #13111b; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.sayfa { max-width: 1240px; margin: 0 auto; padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.marka-adi { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+h1 { font: 700 1.6rem/1.1 var(--f-display); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h1 b { color: var(--accent); font-weight: 700; }
+.alt { color: var(--muted); font-size: .9rem; }
+.rol { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.rol button { border: 0; background: transparent; color: var(--muted); font: 600 .92rem var(--f-body); padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+.rol button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.izgara { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 880px) { .izgara { grid-template-columns: minmax(0, 1fr); } }
+
+.sohbet { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; min-height: 560px; min-width: 0; }
+.akis { flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 68vh; min-height: 320px; }
+.balon { max-width: 88%; padding: 10px 14px; border-radius: 14px; min-width: 0; overflow-wrap: anywhere; }
+.balon.k { align-self: flex-end; background: var(--user); color: var(--user-ink); border-bottom-right-radius: 4px; white-space: pre-wrap; }
+.balon.a { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.balon.a p { margin: 0 0 .6em } .balon.a p:last-child { margin: 0 }
+.balon.a ul, .balon.a ol { margin: .2em 0 .7em; padding-left: 1.3em } .balon.a li { margin: .15em 0 }
+.balon.a h3, .balon.a h4 { font: 600 1rem var(--f-display); margin: .8em 0 .3em }
+.balon.a a { color: var(--accent); }
+.balon.a code { font: .85em var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+.balon.a table { border-collapse: collapse; font-size: .88rem; margin: .4em 0 } .balon.a td, .balon.a th { border: 1px solid var(--line); padding: 4px 8px; text-align: left }
+.tablo-kap { overflow-x: auto; max-width: 100%; }
+.dusunuyor { color: var(--muted); font-style: italic; }
+.not { align-self: center; font-size: .82rem; color: var(--muted); text-align: center; max-width: 52ch; }
+.not.hata { color: var(--bad); }
+
+.oneriler { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 12px; }
+.oneriler button { font: 500 .85rem var(--f-body); color: var(--ink); background: var(--accent-soft); border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; text-align: left; }
+.oneriler button:hover { filter: brightness(0.97); }
+form.yaz { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); align-items: flex-end; }
+form.yaz textarea { flex: 1; min-width: 0; resize: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: var(--r); padding: 10px 12px; font: 15px/1.4 var(--f-body); max-height: 160px; }
+.btn { border: 0; border-radius: var(--r); padding: 10px 16px; font: 600 .92rem var(--f-body); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn.ikincil { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.masa { display: grid; gap: 14px; min-width: 0; }
+.kutu { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+.kutu h2 { font: 600 .78rem var(--f-body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; }
+.iz { display: grid; gap: 6px; font-size: .86rem; }
+.iz-satir { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.iz-ad { font: 500 .8rem var(--f-mono); color: var(--accent); white-space: nowrap; }
+.iz-girdi { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.bos { color: var(--muted); font-size: .88rem; margin: 0; }
+
+.kartlar { display: grid; gap: 8px; }
+.kart { display: grid; grid-template-columns: 38px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.kart:first-child { border-top: 0; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 .95rem var(--f-display); background: var(--accent-soft); color: var(--accent); }
+.kart-ad { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kart-ad a { color: inherit; text-decoration: none; } .kart-ad a:hover { text-decoration: underline; }
+.kart-meta { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dog { color: var(--ok); font-size: .78rem; font-weight: 600; }
+.sayi { font: 500 .82rem var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.sayi small { display: block; color: var(--muted); font-family: var(--f-body); font-size: .72rem; }
+
+.uyum textarea, .uyum input, .uyum select { width: 100%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: var(--r); padding: 9px 11px; font: 14px/1.45 var(--f-body); }
+.uyum textarea { min-height: 92px; resize: vertical; }
+.uyum .satir { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; } .uyum .satir > * { flex: 1 1 140px; }
+.sonuc-ust { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; }
+.rozet { font: 600 .78rem var(--f-body); padding: 3px 10px; border-radius: 999px; }
+.rozet.uygun { background: var(--ok-soft); color: var(--ok); } .rozet.duzeltilmeli { background: var(--warn-soft); color: var(--warn); } .rozet.riskli { background: var(--bad-soft); color: var(--bad); }
+.puan { font: 500 .85rem var(--f-mono); color: var(--muted); }
+.bulgu { border-left: 3px solid var(--line); padding: 4px 0 4px 10px; margin: 8px 0; font-size: .86rem; }
+.bulgu.hata { border-color: var(--bad); } .bulgu.uyari { border-color: var(--warn); } .bulgu.bilgi { border-color: var(--accent); }
+.bulgu b { display: block; } .bulgu span { color: var(--muted); }
+.dipnot { font-size: .75rem; color: var(--muted); margin: 8px 0 0; }
+.durum { font-size: .82rem; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .balon { animation: gel .18s ease-out; } @keyframes gel { from { transform: translateY(4px); opacity: .6 } } }
+</style>
+
+<div class="sayfa">
+  <header>
+    <div class="marka-adi">
+      <h1>İşbirliğim <b>Asistan</b></h1>
+      <span class="alt" id="veri-ozet"></span>
+    </div>
+    <div class="rol" role="group" aria-label="Kimsiniz?">
+      <button type="button" id="rol-marka" data-rol="marka" aria-pressed="true">Markayım</button>
+      <button type="button" id="rol-influencer" data-rol="influencer" aria-pressed="false">Influencer'ım</button>
+    </div>
+  </header>
+
+  <div class="izgara">
+    <section class="sohbet" aria-label="Sohbet">
+      <div class="akis" id="akis" aria-live="polite"></div>
+      <div class="oneriler" id="oneriler"></div>
+      <form class="yaz" id="form">
+        <textarea id="girdi" rows="2" maxlength="4000" placeholder="Sorunuzu yazın…" aria-label="Mesaj"></textarea>
+        <button class="btn ikincil" type="button" id="durdur" hidden>Durdur</button>
+        <button class="btn" type="submit" id="gonder">Gönder</button>
+      </form>
+    </section>
+
+    <aside class="masa">
+      <div class="kutu">
+        <h2>Asistanın çalıştırdığı araçlar</h2>
+        <div class="iz" id="iz"><p class="bos">Asistan veri çektikçe burada görünecek.</p></div>
+      </div>
+      <div class="kutu">
+        <h2 id="kart-baslik">Bulunan influencer'lar</h2>
+        <div class="kartlar" id="kartlar"><p class="bos">Asistan bir arama veya bütçe planı yaptığında profiller burada listelenir.</p></div>
+      </div>
+      <div class="kutu uyum">
+        <h2>Reklam metni kontrolü</h2>
+        <textarea id="uyum-metin" aria-label="Paylaşım metni">Bu çay 1 haftada zayıflatıyor, piyasadaki en iyi çay! İndirim kodu: CAY20 #işbirliği</textarea>
+        <div class="satir">
+          <input id="uyum-marka" placeholder="Marka adı (isteğe bağlı)" aria-label="Marka adı" value="Çaykur Bitki">
+          <select id="uyum-kategori" aria-label="Kategori">
+            <option value="">Kategori seçin</option>
+            <option>Fitness & Sağlık</option><option>Moda & Güzellik</option><option>Yemek & Mutfak</option>
+            <option>Anne & Çocuk</option><option>Yaşam & Lifestyle</option><option>Teknoloji</option>
+          </select>
+        </div>
+        <div id="uyum-sonuc"></div>
+        <p class="dipnot">Yapay zekâ kullanmaz, anında çalışır. Yönetmelik md. 23/A'ya göre ön kontroldür, hukuki görüş değildir.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const VERI = {"influencerlar":[{"id":"9bdeb33f-db5d-4caa-8810-fc4839a16c4e","ad":"Ömürden","kullanici":"omurdenoncel","kategoriler":["Moda & Güzellik","Seyahat","Yaşam & Lifestyle","Eğitim"],"sehir":"Antalya","takipci":919000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"👩‍💼 İş Dünya’sında kadın, evde anne ama önce İNSAN\n✨ Seyahatlerim & günlük hayatım \n🏢 Kıdemli iş geliştirme müdürü | ANTALYA\n👛 Yay | Yükselen Aslan","fiyatlar":{"Reels":5000,"Gönderi":5000,"Hikâye":2500,"Video":5000}},{"id":"ad9c09d6-7cc1-4f9a-a446-e136dea130f0","ad":"Halil K.","kullanici":"h1ly3m","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Seyahat","Yaşam & Lifestyle","Fitness & Sağlık"],"sehir":"Kayseri","takipci":570000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Halil. TikTok’ta 445 bin, Instagram’da 125 bin takipçisi bulunan H1lY3m’in iş birlikleri ve menajerlik süreçlerini yönetiyorum. Günlük vlog, playback, yemek, makyaj ve moda gibi farklı kategorilerde içerikler üretiyoruz. Markanızla ücretli iş birlikleri ve uzun vadeli projeler geliştirmek isteriz.","fiyatlar":{"Reels":10000,"Gönderi":10000,"Hikâye":10000,"Video":10000}},{"id":"73b303dd-88dd-4b74-8a38-122ab032ec1f","ad":"ÖZGÜR GEZGİN","kullanici":"theozgurgezgin","kategoriler":["Otomotiv","Yaşam & Lifestyle","Fitness & Sağlık","Teknoloji","Yemek & Mutfak","Seyahat","Moda & Güzellik","Gaming","Eğitim"],"sehir":"","takipci":392000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Ben Özgür Gezgin. Dijital medya ajans başkanlığı geçmişimin ardından prodüksiyon, yapımcılık ve içerik üretimi alanlarında çalışmalarımı sürdürüyorum. Netflix’te yayında olan Gizemli Ada: Mençuna filminin yapımcısıyım.\n\nBugün Instagram ve YouTube’da hem bireysel olarak hem de kızımla birlikte; aile, çocuk, lifestyle, eğlence, kelime oyunları ve video challenge içerikleri üretiyorum. Samimi, doğal ","fiyatlar":{"Reels":20000,"Gönderi":10000,"Hikâye":5000,"Video":20000}},{"id":"d7081447-1b6e-4137-b946-469625d9d16d","ad":"Ayşegül mintaş","kullanici":"aysegulmintas","kategoriler":["Seyahat","Yaşam & Lifestyle"],"sehir":"Aydın","takipci":360000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Sosyal medya uzmanıyım gezi sanat ve seyahat çekimleri yapıyorum güzel Sanatlar mezunuyum","fiyatlar":{}},{"id":"c9626f60-3e3c-49d4-a85e-84cab3d98b89","ad":"Hülya şahin","kullanici":"Hulyasultan_58","kategoriler":["Moda & Güzellik","Teknoloji","Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk","Eğitim","Fitness & Sağlık"],"sehir":"İstanbul","takipci":360000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Eğlenceli içerik üreticisiyim üç kız annesiyim","fiyatlar":{"Reels":8500,"Gönderi":8500,"Hikâye":3500,"Video":8000}},{"id":"516295ef-43b9-4ca2-a4dd-c178a7c45afc","ad":"İlknur Kaplan","kullanici":"ilknurilizm","kategoriler":["Seyahat","Yaşam & Lifestyle"],"sehir":"Muğla","takipci":307000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"2019’dan beri emek verdiğim İnstagram hesabımdan takipçilerime samimi içerikler üretmeye çalışıyorum","fiyatlar":{"Gönderi":20000,"Hikâye":5000}},{"id":"078c0567-14f2-4927-809e-d28c776465bd","ad":"Gözde Öztürk","kullanici":"engozdeyorumcum","kategoriler":["Yaşam & Lifestyle","Moda & Güzellik","Anne & Çocuk"],"sehir":"İzmir","takipci":292000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Instagram üzerinde 124 bini aşkın takipçimle günlük/haftalık burç yorumları, tarot analizleri ve interaktif fal içerikleri üretiyorum. Kitlem, etkileşimi ve sadakati son derece yüksek, %90'ın üzerinde kadın ağırlıklı ve satın alma eğilimi güçlü bir topluluktan oluşmaktadır.Kadın odaklı markalar, e-ticaret siteleri, mobil uygulamalar, takı/aksesuar, kişisel gelişim ve yaşam tarzı dikeyindeki projel","fiyatlar":{"Reels":5000,"Gönderi":3000,"Hikâye":2000,"Video":5000}},{"id":"a45d968b-b5e8-46ce-a450-3741fb26b27e","ad":"Gokce Oney","kullanici":"gokce_oney","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Anne & Çocuk","Fitness & Sağlık"],"sehir":"Antalya","takipci":235000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"198000+ takipçili içerik üreticisiyim. Güzellik, cilt bakımı, yaşam ve anne-çocuk kategorilerinde özgün reels, story ve UGC içerikleri üretiyorum. Markaların hedef kitlesine doğal ve güven veren içeriklerle ulaşmasını sağlıyorum. Profesyonel iş birliklerine açığım.","fiyatlar":{"Reels":15000,"Gönderi":12000,"Hikâye":4000,"Video":18000}},{"id":"dfc59159-124d-42fe-b715-5141a2c4d2ac","ad":"Pınar ÇATAL","kullanici":"pinarcatal","kategoriler":["Eğitim","Yaşam & Lifestyle","Anne & Çocuk","Yemek & Mutfak","Seyahat"],"sehir":"İstanbul","takipci":169000,"platform":["tiktok","twitter","youtube","instagram"],"dogrulanmis":false,"hakkinda":"İsmim Pınar ÇATAL 15 yaşında otizmli bir oğlum ve dokuz yaşında normal gelişim gösteren bir kızım var. Gıda yüksek mühendisiyim aynı zamanda çocuk gelişimi mezunuyum.\nInstagram hesabımda otizmin bize engel değil pozitif baktığımız taktirde sadece bir eşlikçi olduğunu ve hayatımızı yaşamamıza asla engel olmadığını yansıttığın bir bakış açım var. Binlerce anneye moral olduğuma ve aynı şeyleri yaşaya","fiyatlar":{}},{"id":"19881f0b-bc76-4d7c-91a4-c672b89265cd","ad":"Sümeyye nur efe","kullanici":"kivircik1annee","kategoriler":["Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"Karabük","takipci":151000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"kivircik1annee' olarak anneliğin en doğal, en eğlenceli ve bazen de en 'kaotik' hallerini içtenlikle ve mizahi bir dille paylaşıyorum.","fiyatlar":{"Reels":13000,"Gönderi":7000,"Hikâye":3000,"Video":15000}},{"id":"9e671eeb-d933-49c3-b2e6-c8d6102e307f","ad":"Gizem güler","kullanici":"Haftasonurotamiz","kategoriler":["Moda & Güzellik","Seyahat","Yaşam & Lifestyle","Teknoloji","Yemek & Mutfak"],"sehir":"Bursa","takipci":142000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Mekan öneri, UGC Creator, Öneri","fiyatlar":{"Reels":13000,"Gönderi":10000,"Hikâye":2500,"Video":2500}},{"id":"bcb3d07d-a17a-47df-b046-26e4fcfbb610","ad":"sibel","kullanici":"annekumbarasi","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk","Eğitim","Moda & Güzellik"],"sehir":"Balıkesir","takipci":118000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Sibel.\n\nEv düzeni, temizlik, mutfak püf noktaları ve pratik yaşam önerileri üzerine özgün içerikler üretiyorum. Amacım, takipçilerimin günlük hayatını kolaylaştıracak güvenilir ve uygulanabilir öneriler sunmak. Ürünleri deneyimleyerek doğal ve samimi bir şekilde tanıtmayı önemsiyorum. Hedef kitlem ağırlıklı olarak ev ve aile yaşamına ilgi duyan kadınlardan oluşuyor. Markalarla uzun va","fiyatlar":{"Reels":2500,"Gönderi":2000,"Hikâye":750,"Video":2500}},{"id":"2c478a80-3482-4f05-9246-f365a32e0321","ad":"Sinem sözlü","kullanici":"1geridonusumatolyesi","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Yemek & Mutfak"],"sehir":"Sakarya","takipci":117000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Geri dönüşüm üzerine remix reels","fiyatlar":{}},{"id":"37d722b0-9707-4e6b-8ba4-5701ee560e47","ad":"Eyüp Karakaya","kullanici":"eyka","kategoriler":["Teknoloji"],"sehir":"Adana","takipci":108000,"platform":["tiktok","twitter","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Elektronik donanım, PCB tasarımı ve gömülü sistemler üzerine teknik eğitimler hazırlayan bir içerik üreticisi ve mühendisim. Öğrencilerimle sahada edindiğim gerçek proje deneyimlerimi paylaşarak uygulamalı ve anlaşılır içerikler sunuyorum. Yeni komponentleri test etmeyi, devreleri analiz etmeyi ve \"dene, yap, öğren\" felsefesiyle teknik geliştirme sürecini kolaylaştıran pratik yöntemleri aktarmayı ","fiyatlar":{"Reels":3500,"Gönderi":2500,"Hikâye":2000,"Video":5000}},{"id":"1c873a59-f56c-4deb-9f2c-8473c2641490","ad":"Sibel Balduz","kullanici":"HeyyFamily","kategoriler":["Anne & Çocuk"],"sehir":"Kocaeli","takipci":97000,"platform":["youtube"],"dogrulanmis":false,"hakkinda":"Merhaba! Ben aile ve eğlence kategorisinde içerikler üreten bir YouTube içerik üreticisiyim.\n\nKanalımda ailece gerçekleştirdiğimiz eğlenceli aktiviteler, çocuklarla oyunlar, oyuncak tanıtımları, ürün deneyimleri ve keyifli yarışma videoları paylaşıyorum.\n\n96.000'i aşkın abonem ve yüksek izlenme alan videolarımla geniş bir kitleye ulaşıyorum.\n\nMarkalarla samimi, yaratıcı ve güvenilir iş birlikleri ","fiyatlar":{"Reels":5000,"Video":10000}},{"id":"c6890a0d-df91-46cd-ac68-dd1225221319","ad":"aytekin bozdogan","kullanici":"Discovernow","kategoriler":["Teknoloji","Seyahat","Eğitim","Yaşam & Lifestyle"],"sehir":"Ankara","takipci":94000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"DiscoverNow’da doğa, hayvanlar ve ilginç bilgiler üzerine mizahi ve özgün kısa video içerikleri üretiyorum. İçeriklerimi YouTube, Instagram, TikTok ve Facebook olmak üzere 4 farklı platformda yayınlıyorum. Yüksek izlenme potansiyeline sahip, eğlence ve bilgiyi birleştiren içerik formatımla markalarla yaratıcı ve doğal iş birlikleri gerçekleştirmeye açığım.","fiyatlar":{"Reels":5000,"Gönderi":2500,"Hikâye":1000,"Video":8000}},{"id":"3a710d93-2257-4da0-abbd-3661caad8d78","ad":"metin aytekin","kullanici":"metinaytekin","kategoriler":["Eğitim","Teknoloji"],"sehir":"İstanbul","takipci":92000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Bilim insanı ama bildiklerinizden değil","fiyatlar":{"Reels":18000,"Gönderi":25000,"Hikâye":9000,"Video":42000}},{"id":"41720dd0-9abc-444f-891d-16224599f08e","ad":"Gülseren Aydın","kullanici":"gulserenn.61","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Yemek & Mutfak","Seyahat","Eğitim","Otomotiv","Teknoloji","Fitness & Sağlık"],"sehir":"Balıkesir","takipci":91000,"platform":["instagram","tiktok"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Gülseren Aydın. Lifestyle, moda, güzellik, giyim ve makyaj alanlarında içerikler üretiyorum. Güncel trendleri takip ederek yaratıcı, özgün ve ilgi çekici içerikler hazırlıyorum. Markalarla keyifli ve etkili iş birlikleri gerçekleştirerek ürünleri ve deneyimleri takipçilerimle buluşturmayı seviyorum.","fiyatlar":{}},{"id":"828a631d-e131-48be-8c5b-aa3dad499e0a","ad":"Hüseyin Öztürk","kullanici":"Sayinyolcular","kategoriler":["Seyahat","Yaşam & Lifestyle","Yemek & Mutfak"],"sehir":"İstanbul","takipci":86000,"platform":["instagram","youtube","tiktok"],"dogrulanmis":true,"hakkinda":"Sayın Yolcular, gezi, keşif, motosiklet, günlük yaşam ve gerçek hikâyeler üzerine içerikler üreten bir sosyal medya markasıdır. Instagram’da 80.000’in üzerinde takipçiye ve güçlü erişim potansiyeline sahibim. Sosyal Medya Yöneticiliği ve Oyunculuk mezunuyum; kamera önü deneyimim ve rahatlığım sayesinde içeriklerimde hikaye anlatımını profesyonelce zenginleştiriyorum. İçerik üreticiliğinin yanı sır","fiyatlar":{"Reels":10000,"Gönderi":2000,"Hikâye":2000,"Video":10000}},{"id":"feeb78ed-6c47-4618-898e-67dfc8ccd05d","ad":"Seren şimşek","kullanici":"simsekailesiofficial","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Teknoloji","Yemek & Mutfak","Seyahat","Anne & Çocuk","Yaşam & Lifestyle"],"sehir":"Sakarya","takipci":82000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"İnstagram İçerik Üreticisiyim\nTrendyol Resmi Influencer","fiyatlar":{"Reels":7500,"Gönderi":4000,"Hikâye":2000,"Video":8000}},{"id":"19b3b42b-96fa-4807-a6fd-edb867fb6a32","ad":"Merve Tepedelen","kullanici":"Mrv.dereciii","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Seyahat","Teknoloji"],"sehir":"Samsun","takipci":66000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Yaklaşık 1.5 yıldır dijital dünyada güzellik, cilt bakımı ve saç bakımı üzerine samimi ve doğal içerikler üretiyorum. Kendi platformumda, takipçilerimle kurduğum 'arkadaşça' iletişimle, denediğim ürünleri ve güzellik rutinlerini en şeffaf haliyle paylaşıyorum.\nCilt bakımı ve makyaj teknikleri konusunda edindiğim tecrübeyi, estetik ve kaliteli prodüksiyon ile birleştirerek markaların ihtiyaçlarına ","fiyatlar":{"Reels":2500,"Gönderi":1500,"Hikâye":1500,"Video":3000}},{"id":"c45c52d8-1d1c-4a7f-97bf-4eb870e25bbe","ad":"Merve Baykan","kullanici":"Baykan.ciftligi","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Yemek & Mutfak"],"sehir":"Niğde","takipci":65000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Merhaba, ben Baykan Çiftliği'nin içerik üreticisi Merve. 🌿\n\nKöy hayatını, çiftçilik ve hayvancılıkla iç içe geçen günlük yaşamımızı, üretmenin güzelliğini ve ailece kurduğumuz doğal yaşamı takipçilerimle paylaşıyorum.\n\nİçeriklerimde samimiyeti ve gerçekliği ön planda tutuyor; ürünleri günlük hayatın içinde, doğal ve yaratıcı bir şekilde tanıtmayı seviyorum. Çiftlik yaşamından mutfağa, ev yaşamınd","fiyatlar":{"Reels":3000,"Gönderi":1500,"Hikâye":600,"Video":2000}},{"id":"b6c69f07-8be8-46c2-a3b7-7a8b960fd0fd","ad":"Yasemin Kahramanoğlu","kullanici":"yasekahramanoglu","kategoriler":["Fitness & Sağlık","Moda & Güzellik","Yemek & Mutfak","Seyahat","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":59000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Yoga Alliance sertifikalı yüz yogası eğitmeni, içerik üreticisi ve seyahat tutkunu biriyim. Samimi ve güven odaklı içeriklerimle takipçilerime ilham verirken markalarla yaratıcı ve etkili iş birlikleri gerçekleştiriyorum.","fiyatlar":{"Reels":14000,"Gönderi":10000,"Hikâye":3600,"Video":14000}},{"id":"d081b46d-e494-46b0-a20d-21edae11da95","ad":"Selen Bostancı","kullanici":"seleninblogu24","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Moda & Güzellik"],"sehir":"İstanbul","takipci":56000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Selen. Instagram hesabımda 55,6 bin takipçimle anne-bebek, çocuk gelişimi, ebeveynlik ve günlük yaşam kategorilerinde özgün içerikler üretiyorum.\n\nÖzellikle Reels içeriklerimde doğal anlatım, yaratıcı fikirler ve ürün deneyimlerini ön planda tutuyorum. Hedef kitleme güven veren, samimi ve dikkat çekici içeriklerle markaların dijital görünürlüğüne katkı sağlamayı hedefliyorum.\n\nÜcretli","fiyatlar":{"Reels":3500,"Gönderi":1500,"Hikâye":1500,"Video":3500}},{"id":"aee8fcae-518e-43b2-bd92-8e18edd31ceb","ad":"Merve Özer","kullanici":"osman_merve_ozer","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"Edirne","takipci":51000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Merve. Markalar için samimi, güven veren ve dönüşüm odaklı UGC içerikleri üretiyorum. Lifestyle, aile, ev, kişisel bakım, gıda ve evcil hayvan kategorilerinde deneyim videoları, kutu açılışı, ürün tanıtımı, voice-over, reels ve fotoğraf içerikleri hazırlıyorum. Amacım ürünlerinizi reklam gibi değil, gerçek kullanıcı deneyimiyle hedef kitlenize ulaştırmak.","fiyatlar":{}},{"id":"f9fb5abc-44ad-4207-a491-ded927f6b934","ad":"Kkdrama1","kullanici":"Kkdrama1","kategoriler":["Moda & Güzellik"],"sehir":"Rize","takipci":42000,"platform":["tiktok","twitter","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Kore dizileri (K-Drama) odaklı içerikler üreten bir içerik üreticisiyim. Instagram’da 28 bin, TikTok’ta ise 14 bin takipçiye sahibim. İçeriklerim düzenli olarak K-Drama ile ilgilenen aktif bir kitleye ulaşıyor. Hedef kitleme uygun markalarla uzun vadeli ve doğal iş birlikleri gerçekleştirmek istiyorum. Talep edilmesi hâlinde hesap istatistiklerimi ve erişim verilerimi paylaşabilirim.","fiyatlar":{"Reels":2050,"Gönderi":1500,"Hikâye":1000}},{"id":"0cf377c6-69df-4efc-950f-87f182966876","ad":"Serdar sezgin","kullanici":"Real_serdar","kategoriler":["Yaşam & Lifestyle"],"sehir":"","takipci":41000,"platform":["youtube"],"dogrulanmis":false,"hakkinda":"Merhaba, ben YouTube içerik üreticisiyim. Kanalımda 41.000 abone bulunuyor ve Shorts videolarım ortalama 15.000–30.000 arasında izleniyor.\n\nMarkanızla YouTube Shorts üzerinden bir iş birliği yapmakla ilgileniyorum. Ürün veya hizmetinizi içeriklerimde tanıtabileceğim bir sponsorluk çalışması hakkında görüşmek isterim.\n\nUygun görürseniz detayları ve iş birliği şartlarını konuşabiliriz. Teşekkürler.","fiyatlar":{"Reels":1000}},{"id":"55d4d5d6-f1f8-4cee-9ef0-81076c4aeb8a","ad":"Beyza Ay","kullanici":"Beyzayvibes","kategoriler":["Yemek & Mutfak"],"sehir":"İzmir","takipci":39000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Fit, pratik, lezzetli tarifler paylaşıyorum. 39B takipçim mevcut, reels videolarımın ortalama izlenmesi 100 B ancsk 5 MN izlenen bir çok video mevcut.","fiyatlar":{"Reels":3000,"Gönderi":2000,"Hikâye":1000,"Video":3000}},{"id":"f28bd4df-1966-4888-8f7b-b94c652bed8a","ad":"Helin Erdal","kullanici":"Riderhelin","kategoriler":["Moda & Güzellik","Teknoloji","Otomotiv"],"sehir":"İstanbul","takipci":38000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Her zaman her yerde en iyileriyle","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":250,"Video":1000}},{"id":"ca87094d-7b71-4e0f-b439-696c408cf998","ad":"Aylin taran","kullanici":"aylinn.35","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Moda & Güzellik","Yemek & Mutfak","Fitness & Sağlık","Eğitim"],"sehir":"İzmir","takipci":34000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba 2 oğlu olan onlarla birlikte büyüyen enerjik bir anneyim doğallık benim için çok önemli","fiyatlar":{"Reels":1000,"Gönderi":750,"Hikâye":500,"Video":1000}},{"id":"8eecc747-920f-4ed8-b719-d68272f94271","ad":"ESRA NUR YEŞİLDAĞ","kullanici":"esragablan.blog","kategoriler":["Teknoloji","Moda & Güzellik","Fitness & Sağlık","Yaşam & Lifestyle","Otomotiv","Anne & Çocuk","Eğitim","Gaming","Yemek & Mutfak","Seyahat"],"sehir":"İstanbul","takipci":33000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Markalarla anlaşmalar sağlayarak içerik üretiyorum. Ugc içerik üreticisiyim aynı zamanda sosyal medya hesabımda paylaşımlarda yapıyorum.","fiyatlar":{"Reels":3000,"Gönderi":2500,"Hikâye":1000,"Video":3000}},{"id":"0cf29de1-6480-4002-a035-1646110d2f59","ad":"Nahide büyükbaş","kullanici":"Kayaln1","kategoriler":["Anne & Çocuk","Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"Eskişehir","takipci":29000,"platform":["instagram","youtube"],"dogrulanmis":true,"hakkinda":"Ben Nahide. 🌿\n\nAnnelik, günlük yaşam, doğal yaşam ve üretmek hayatımın en büyük parçaları.\nKendi ellerimle bir şeyler üretmeyi, yeni şeyler öğrenmeyi ve öğrendiklerimi paylaşmayı seviyorum. 🕯️🌸\n\nBazen mum yaparken, bazen bahçede, bazen mutfakta, bazen de kamera karşısında bulursunuz beni.\nKüçük bir fikri alıp emeğimle büyütmeyi seviyorum.\n\nHayalim; sadece içerik üretmek değil, kendi emeğimle ke","fiyatlar":{"Reels":2500,"Gönderi":1000,"Hikâye":250,"Video":1000}},{"id":"79c8dbed-3f1d-4249-b0d8-a041c9d96d9f","ad":"Esra koçak","kullanici":"_unanne","kategoriler":["Yemek & Mutfak","Anne & Çocuk"],"sehir":"İstanbul","takipci":27000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Un Anne!\n\n27.000 kişilik topluluğumla ev yapımı lezzetler, pratik tarifler, yaratıcı sunumlar ve mutfakta hayatı kolaylaştıran fikirler paylaşıyorum.\n\nİçeriklerimde doğallığı, lezzeti ve samimiyeti ön planda tutuyor; takipçilerime ilham veren, denenebilir ve günlük hayata uyarlanabilir tarifler sunuyorum.\n\nGıda, mutfak ürünleri ve yaşam kategorilerindeki markalarla, ürünleri kendi içe","fiyatlar":{"Reels":2000,"Gönderi":1000,"Hikâye":500,"Video":2500}},{"id":"88b0198c-e1b1-4bed-9693-0b76b730e9c1","ad":"Burcu Baştürk","kullanici":"Burcu_basturk","kategoriler":["Yemek & Mutfak"],"sehir":"Ankara","takipci":27000,"platform":["instagram","youtube","tiktok"],"dogrulanmis":false,"hakkinda":"Mutfağında hergun yeni tarifler","fiyatlar":{"Reels":2500,"Gönderi":2000,"Hikâye":2000,"Video":2500}},{"id":"3c502a5d-0b52-40ed-9522-4a487cf1a2b9","ad":"TUBA KARACA KARAMEŞE","kullanici":"karaca__hanim","kategoriler":["Teknoloji","Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle","Eğitim","Seyahat","Anne & Çocuk"],"sehir":"Sinop","takipci":26000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Instagram'da @karaca__hanim hesabıyla içerik üretiyorum. 🎥\nGünlük yaşam vlogları ve tamamen hayatın içinden, doğal ve samimi videolar paylaşıyorum. Markalarla ve kurumlarla iş birlikleri yaparak ürün ve hizmetleri kendi tarzımla, özgün videolarla tanıtmak istiyorum.\nInfluencer başvurusu ve iş birliği süreciniz hakkında bilgi almak, ekibinizin bir parçası olmak isterim.\nDeğerlendirmen","fiyatlar":{"Reels":750,"Gönderi":500,"Hikâye":500,"Video":750}},{"id":"3296ab52-b7ee-43d9-a1d0-1dea73196d7a","ad":"Atakan pirani","kullanici":"Atakanpirani","kategoriler":["Eğitim"],"sehir":"İstanbul","takipci":26000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Gündelik hayatta yaşanan olayları eleştirerek mizahi yönden insanların dikkatini çekiyorum","fiyatlar":{"Reels":10000,"Hikâye":1500}},{"id":"61cf9726-084a-4ede-94f1-177a28ea4cbb","ad":"Sevilay Gündoğdu","kullanici":"Sevilayhasanbasgundogdu","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":26000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Sevilay. Lifestyle, ev yaşamı ve ürün deneyimi odaklı içerikler üreten bir içerik üreticisiyim.\nInstagram hesabımda son 30 günde 396 bin\ngörüntülenmeye ulaştım ve markalarla doğal ürün deneyimi ve Reels içerikleri üzerine çalışmalar gerçekleştiriyorum.","fiyatlar":{"Reels":4000,"Gönderi":4000,"Hikâye":1500,"Video":7000}},{"id":"60acf779-27ac-45a0-acf0-579bae4feb1b","ad":"Gülşah bayram","kullanici":"Muagulsah","kategoriler":["Anne & Çocuk","Moda & Güzellik","Fitness & Sağlık","Yemek & Mutfak","Yaşam & Lifestyle","Eğitim"],"sehir":"İstanbul","takipci":25000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba nasılsınız 3 cocuk annesiyim uzun zamandır instagramda içerik üreticisiyim (mini) bu aralar taşınma sürecindeyiz ve bu sebepten dolayı pek aktif değilim ama düzenim oturduğunda devame deceğim","fiyatlar":{"Reels":2000,"Gönderi":3000,"Hikâye":500,"Video":200}},{"id":"3d540f8a-f8d2-4969-9cfb-a81b892b89b1","ad":"İlayda sezen","kullanici":"İlaydasezen","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Bursa","takipci":25000,"platform":["instagram","tiktok"],"dogrulanmis":false,"hakkinda":"Merhaba, ben İlayda Sezen. ✨\n\nInstagram ve TikTok platformlarında güzellik, makyaj, cilt bakımı, ev ve yaşam kategorilerinde içerikler üreten bir içerik üreticisiyim.\n\nKamera karşısında doğal, samimi ve enerjik anlatımımla ürünleri yalnızca tanıtmak değil, deneyimlerimi takipçilerime gerçekçi ve güven veren bir şekilde aktarmak istiyorum.\n\nKonuşmalı ürün tanıtımları, ürün deneyim videoları, makyaj","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":300,"Video":1000}},{"id":"1537a5f2-f04f-4aba-be3e-9c4af08a8d50","ad":"Nazlı doğanel","kullanici":"nazodoganel","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Seyahat"],"sehir":"İstanbul","takipci":25000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"İçerik üreticiliğine yeni adım atıyorum. Günlük yaşam, moda, güzellik, kişisel bakım ve alışveriş gibi farklı alanlarda içerikler üretmeyi seviyorum.\n\nSosyal medyada kendi tarzımı ve deneyimlerimi samimi, doğal ve özgün bir şekilde paylaşmayı hedefliyorum.\n\nYeni markalar keşfetmeye, ürün deneyimlerini takipçilerimle paylaşmaya ve satış ortaklığı projelerinde yer almaya heyecan duyuyorum.\n\nBu yolcu","fiyatlar":{"Reels":1500,"Gönderi":750,"Hikâye":400,"Video":1000}},{"id":"82c0e6ac-15dc-45ed-9832-d8d57c2a05cb","ad":"Öznur Toprucak","kullanici":"oznurisstan","kategoriler":["Yaşam & Lifestyle","Seyahat","Yemek & Mutfak","Moda & Güzellik"],"sehir":"İstanbul","takipci":25000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Instagram’da organik 25.000 takipçim var seyahat gezi kültür sanat ve kendi hayatımdan kareler paylaşıyorum","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":750,"Video":2000}},{"id":"1a649d5b-76fe-4897-9c87-bdae254fcbb0","ad":"Ebru Güner Koç","kullanici":"ebruslihayat","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"İstanbul","takipci":23000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"30 yaşında 2 erkek annesiyim. Günlük gerçek yaşam , komedi ,temizlik düzen ve yemek tarifleri dijital içerik üreticisi bir anneyim.","fiyatlar":{"Reels":4000,"Gönderi":3000,"Hikâye":1000,"Video":3000}},{"id":"40cc3fd9-a637-48a3-a4d2-4070281a37b0","ad":"Esra efetaşkın","kullanici":"yemek.manifestosu","kategoriler":["Yemek & Mutfak","Anne & Çocuk"],"sehir":"İstanbul","takipci":22000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"İnstagramda 21.500 takipçim bulunmaktadır. Aylık görüntülemem 2 milyondır. Sağlıklı tarifler, sağlıklı beslenme ve çocuklu yaşam paylaşımları yapmaktayım","fiyatlar":{"Reels":6000,"Gönderi":4000}},{"id":"7db730a1-d21e-43a9-9779-f13f2a48c3c7","ad":"Nurgül Yalvaç","kullanici":"Nurgullyalvac","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk","Teknoloji","Seyahat"],"sehir":"İstanbul","takipci":21000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Nurgül Yalvaç. Yaşam tarzı, moda, güzellik, ev yaşamı ve günlük hayat içerikleri üreten bir içerik üreticisiyim. Takipçilerime samimi, güvenilir ve doğal içerikler sunmayı önemsiyorum. Ürün deneyimi, Reels, hikâye ve UGC içerikleri üreterek markalarla uzun vadeli iş birlikleri yapmayı hedefliyorum.","fiyatlar":{"Reels":15000,"Gönderi":10000,"Hikâye":5000}},{"id":"20159a53-531d-44fa-8a74-8c0ab2823a3e","ad":"Ayşe Ak","kullanici":"ayseilegunler","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"Bursa","takipci":21000,"platform":["instagram","youtube","tiktok"],"dogrulanmis":false,"hakkinda":"Bursa da yaşıyorum 3 çocuk annesiyim.15 aydır düzenli olarak yemek videoları çekerek içerik üretiyorum.","fiyatlar":{"Reels":4500,"Gönderi":4000,"Hikâye":2500,"Video":5000}},{"id":"58a0a7b0-29c8-45c7-ac60-7f61accb7613","ad":"şeyma çetin","kullanici":"seymaamutfakta","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Seyahat"],"sehir":"Bursa","takipci":20000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Yemek yapmayı ve de sunmayı seven biri\nSeyehat etmeye bayılır\nİnsanlarla iletişimi iyi olan biri","fiyatlar":{"Gönderi":4000,"Hikâye":2000}},{"id":"31b412f3-ada0-4901-b2cb-99a4a118de71","ad":"Defne Baytar","kullanici":"defnebaytar","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Hatay","takipci":19000,"platform":["instagram","tiktok"],"dogrulanmis":false,"hakkinda":"Kendimi güzellik, moda ve yaşam tarzı alanlarında geliştiren; yaratıcı, özgün ve estetik içerikler üretmeyi seven bir içerik üreticisiyim. Markaların hikâyelerini kendi tarzımla yansıtarak ilham veren içerikler oluşturmayı hedefliyorum. ✨","fiyatlar":{"Reels":1500,"Gönderi":2000,"Hikâye":750,"Video":1500}},{"id":"fb8dd2e2-85f3-4a17-a2d9-912d54e2a38c","ad":"Serap Doğan","kullanici":"Serap","kategoriler":["Teknoloji","Moda & Güzellik","Fitness & Sağlık","Yaşam & Lifestyle"],"sehir":"İzmir","takipci":17000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba! Ben Serap. Markalar için güven veren, gerçek kullanıcı deneyimini yansıtan UGC içerikler üretiyorum. Amacım; ürünlerinizi sadece göstermek değil, insanların bağ kurmasını sağlamak.","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":1000,"Video":2500}},{"id":"292546c9-6856-489b-9869-4cc315e5a74c","ad":"Hanife Akman","kullanici":"hanifeekocaer","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Anne & Çocuk","Yaşam & Lifestyle","Yemek & Mutfak","Eğitim"],"sehir":"Balıkesir","takipci":17000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"6 yıldır içerik üretiyorum,","fiyatlar":{"Reels":2500,"Gönderi":2000,"Hikâye":1500,"Video":2500}},{"id":"72e645e1-4043-44ee-9d70-06ce6c53279f","ad":"Seda özcan","kullanici":"ai_hikayedizi","kategoriler":["Teknoloji"],"sehir":"Erzincan","takipci":17000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Yapay zekâ destekli hikâye ve dizi videoları üretiyorum. Instagram @aihikayedizi hesabımda yaratıcı ve dikkat çekici Reels içerikleri paylaşıyorum. Markalar için özgün ürün tanıtımları ve reklam videoları hazırlamak istiyorum. Ücretli iş birliklerine ve uzun vadeli marka anlaşmalarına açığım","fiyatlar":{"Reels":2000,"Gönderi":1000,"Hikâye":500,"Video":1500}},{"id":"14f681e3-ade8-450d-af4c-c12b3597969c","ad":"Berrin Ganbarov","kullanici":"berrinnngirgin","kategoriler":["Moda & Güzellik","Seyahat","Yaşam & Lifestyle"],"sehir":"Zonguldak","takipci":17000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Enerjik,dogal düşünen,iletişimve ikna çok güçlü","fiyatlar":{"Reels":15000,"Gönderi":10000,"Hikâye":5000,"Video":20000}},{"id":"ed5a4a51-e8c2-4dec-ad32-fabb9882c03b","ad":"Ayşe Can","kullanici":"_aysecnn","kategoriler":["Moda & Güzellik","Seyahat","Yaşam & Lifestyle"],"sehir":"Trabzon","takipci":16000,"platform":["instagram","tiktok"],"dogrulanmis":true,"hakkinda":"Trabzonda yaşıyorum \nGezmeyi seyahat etmeyi çok seviyorum kombin yapmayı","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":1000,"Video":2000}},{"id":"393daecb-046c-4799-be6d-658ed45d65c5","ad":"Ozlem Akbas","kullanici":"ozlem_bican_akbas","kategoriler":["Anne & Çocuk","Yemek & Mutfak","Moda & Güzellik","Fitness & Sağlık","Yaşam & Lifestyle","Seyahat"],"sehir":"Edirne","takipci":15000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Özlem Akbaş. Instagram’da anne-çocuk, aile, ev yaşamı ve günlük hayat üzerine doğal ve samimi içerikler üreten bir içerik üreticisiyim. 10 ve 6 yaşında iki kızım var. Aynı zamanda Trendyol Influencer olarak ürün tanıtımları ve link paylaşımları gerçekleştiriyorum. Instagram hesabımda son 30 günde 1 milyonun üzerinde görüntülenmeye ulaştım. Markalarla Reels, Story ve UGC içerikleri haz","fiyatlar":{"Reels":1500,"Gönderi":750,"Hikâye":500,"Video":1000}},{"id":"c8934c71-5c92-43bd-a5f4-d0ce461c5731","ad":"Ayşenur çaylak","kullanici":"aysenurrcaylak","kategoriler":["Yemek & Mutfak","Moda & Güzellik","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"Manisa","takipci":15000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, Instagram hesabımda yaklaşık 15.400 takipçim bulunuyor. Son 30 günde hesabım 1 milyon hesaba ulaştı. Ev yaşamı ve günlük hayat odaklı Reels içerikleri üretiyorum. Markanızla ücretli Reels ve Story iş birliği gerçekleştirmek isterim. Değerlendirmeniz için teşekkür ederim. 🌸","fiyatlar":{"Reels":4000,"Gönderi":2000,"Hikâye":1000,"Video":3000}},{"id":"7d4dbd88-9789-4a00-98c9-161e20ae4972","ad":"Rumeysa Yılmazer","kullanici":"Rmysacablog","kategoriler":["Yaşam & Lifestyle","Anne & Çocuk","Moda & Güzellik"],"sehir":"Gaziantep","takipci":15000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"İçerik üreticisiyim 27 yaşındayım 2 çocuk annesiyim","fiyatlar":{"Reels":2500,"Gönderi":2000,"Hikâye":1500,"Video":3000}},{"id":"a909c251-60bf-43fc-8cfe-5a4dd2621853","ad":"Derya Ercetingoz","kullanici":"HiddenSpot","kategoriler":["Seyahat","Yaşam & Lifestyle","Eğitim"],"sehir":"İzmir","takipci":15000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Instagram da HiddenSpot (ingilizce) ve tarih _spot (Türkçe) iki sayfanin içerik üreticisiyim. Kitlem 35-65 yaş ağırlıklı, tarih seven, okuyan, araştıran orta-üst sınıf insanlar. Marka işbirliklerine açığım.","fiyatlar":{"Gönderi":1,"Hikâye":1000}},{"id":"9438fb38-d1f2-438b-81be-346d89162e46","ad":"Deniz Tekiner Erdoğan","kullanici":"Handby_dennis","kategoriler":["Moda & Güzellik"],"sehir":"Sakarya","takipci":15000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhabalar amatör olarak örgü yapıyorum özellikle popüler çantaları örüyorum sezonda popüler olan şapka yapıyorum aynı zamanda onlara takım olarak hızla büyüyen bir Instagram profilin var organik takipçilerim var her gün reelden gelen yaklaşık 50 100 takipçim oluyor yavaş olarak büyüyorum takipcilerimin çoğunu kadınlar oluşturuyor","fiyatlar":{"Reels":2500,"Gönderi":1000,"Hikâye":1000,"Video":2500}},{"id":"23e8cd48-3edd-4956-a6ca-58537d6a48be","ad":"Emirhan gün","kullanici":"Emirrsilaa","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yemek & Mutfak","Seyahat","Yaşam & Lifestyle","Gaming","Otomotiv"],"sehir":"İstanbul","takipci":15000,"platform":["instagram","youtube","tiktok"],"dogrulanmis":false,"hakkinda":"Merhaba! 👋\n\nEşimle birlikte Instagram’da eğlenceli, samimi ve dikkat çekici Reels içerikleri üretiyoruz. 13.000 takipçili hesabımızda geniş kitlelere ulaşarak yüksek izlenme sayılarına ulaşıyoruz.\n\n📈 Reels videolarımız 100.000’in üzerinde izlenmeye ulaşırken, videolarımızdan biri 13 milyon izlenme elde etti.\n\nMarkalarla iş birliği yaparak ürün ve hizmetleri doğal, yaratıcı ve dikkat çekici içeri","fiyatlar":{"Reels":2500,"Gönderi":1500,"Hikâye":500,"Video":2500}},{"id":"9bad581e-98ca-43f4-9ac0-819c119ad091","ad":"Ertuğrul tümenci","kullanici":"erugrul_tmnci0","kategoriler":["Fitness & Sağlık","Yemek & Mutfak"],"sehir":"Adana","takipci":13000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"İslami içerik üretiyorum adım Ertuğrul soyadım tümenci sizlerle işbirliği yapmayı çok isterim","fiyatlar":{"Reels":450,"Gönderi":400,"Hikâye":200}},{"id":"d0634829-0a59-473f-a29c-915aef29460f","ad":"Seda Özgen","kullanici":"sedaaozgen","kategoriler":["Teknoloji","Moda & Güzellik","Seyahat","Yemek & Mutfak","Eğitim","Anne & Çocuk","Yaşam & Lifestyle","Fitness & Sağlık"],"sehir":"Antalya","takipci":13000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Çalışan bir anne olarak; sporu, sağlıklı yaşamı, ev dekorasyonunu ve günlük hayatı doğal ve samimi içeriklerle takipçilerimle buluşturuyorum.\n\nSosyal medya benim için yalnızca ürün tanıtılan bir alan değil; deneyimlediğim, araştırdığım ve gerçekten memnun kaldığım ürünleri güvenilir bir dille paylaştığım bir yaşam platformu. Takipçilerimle kurduğum güçlü iletişim sayesinde önerilerim gerçek deneyi","fiyatlar":{}},{"id":"9fdc3535-81c9-40b5-88c6-8136493cf9d7","ad":"Hande TAYAN","kullanici":"cihandeylerota","kategoriler":["Seyahat","Yaşam & Lifestyle","Eğitim","Yemek & Mutfak"],"sehir":"Ankara","takipci":13000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Yurtiçi ve yurtdışı gezilerimdeki deneyimlerimi paylaşıyorum. Takipçilerim kıyafetlerimi, yediklerimi ve içtiklerimi merak ediyor. Seyahat tüyoları istiyorlar. İnsanlarla iletişim halinde olmaktan keyif alıyorum","fiyatlar":{"Reels":2500,"Gönderi":1500,"Hikâye":500,"Video":5000}},{"id":"ef487073-9172-4cab-b44a-2d20a673a78a","ad":"Ecrin Koçak","kullanici":"ecrinkocaak16","kategoriler":["Moda & Güzellik"],"sehir":"Bursa","takipci":12000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, iyi günler dilerim.\nBen Ecrin Koçak, Tiktok’ta [10.000+] takipçiye sahip, özellikle genç kitleye hitap eden bir içerik üreticisiyim.\nSayfamda samimi, doğal ve genç enerjili içerikler üretiyorum.\nSizin markanızla uyumlu içerikler üretmekten mutluluk duyarım.\nİşbirliği/PR çalışması için uygun olduğumu belirtmek isterim.\nDilerseniz detayları konuşmak üzere iletişimde kalabiliriz.","fiyatlar":{"Reels":600,"Gönderi":200,"Hikâye":400,"Video":1000}},{"id":"6dd68f81-2018-49cc-9961-37862a7572c2","ad":"Berfin Şahinler","kullanici":"İtsberfinvlog","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Erzurum","takipci":11000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Lifestyle, güzellik ve moda/öneri ile ilgili içerikler üretiyorum","fiyatlar":{"Reels":1750,"Gönderi":1500,"Hikâye":500,"Video":1750}},{"id":"424b22fc-4c6c-456e-b171-7b67c8a0b1f5","ad":"Aslı Gürcan","kullanici":"lettucenails","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yemek & Mutfak","Yaşam & Lifestyle","Eğitim"],"sehir":"Ankara","takipci":11000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Lettuce Nails. Instagram ve TikTok'ta güzellik, bakım, yaşam tarzı ve günlük yaşam içerikleri üretiyorum. Samimi anlatım tarzım ve güvenilir ürün deneyimlerimle takipçilerime ilham vermeyi hedefliyorum.","fiyatlar":{"Reels":7000,"Gönderi":7000,"Hikâye":2000,"Video":7000}},{"id":"be115b25-8a5a-4199-adf5-b6de1d6fe8a2","ad":"Hatice Yavru","kullanici":"haticeyavru","kategoriler":["Yaşam & Lifestyle","Yemek & Mutfak","Eğitim","Teknoloji"],"sehir":"İstanbul","takipci":11000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Bir dönem reklamcılık ve satış pazarlama sektöründe çalıştım.\nSon 2 yıldır kitaplara ve okumaya olan ilgimden dolayı bu deneyimlerimi kendi kurmuş ve geliştirmekte olduğum @kitapblogum_tr sayfamı yönetiyorum.","fiyatlar":{"Reels":700,"Gönderi":500,"Hikâye":400}},{"id":"858b6916-6f3c-4196-9b91-45f96f4af041","ad":"GAMZE ALANDAĞ GÜL","kullanici":"gamzealandaggul","kategoriler":["Eğitim","Seyahat","Moda & Güzellik","Yaşam & Lifestyle","Teknoloji"],"sehir":"İzmir","takipci":11000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Gamze\n\nHayatım aslında tek bir alana sığmıyor. Arkeoloji eğitimiyle başlayan yolculuğum bugün İnsan Kaynakları alanında devam ederken, bir yandan da dijital dünyada kendime ait küçük bir alan oluşturuyorum.\n\nBurada günlük hayatımdan küçük anları; kombin, moda, bakım ve güzellik rutinlerimi, keşfettiğim ürünleri, iş hayatımı ve evliliğin bazen romantik bazen de oldukça komik tarafların","fiyatlar":{"Reels":1500,"Gönderi":2500,"Hikâye":1000,"Video":3500}},{"id":"729cbdde-73e7-40b8-a204-b964d48b87da","ad":"bilge övünç","kullanici":"tikolojik","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk","Eğitim","Fitness & Sağlık"],"sehir":"İstanbul","takipci":10000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Ben Bilge.Tourette sendromunu tanıtmak ve tiklerimle yaşarken deneyimlerimi aktarmak amacıyla hesabımı kullanıyorum.Eğitim,sağlık ve kişisel gelişim alanlarında işbirliğine açığım.","fiyatlar":{"Reels":1,"Gönderi":2,"Hikâye":2000,"Video":1500}},{"id":"89c4d88c-eae7-4992-8437-b72d771e69eb","ad":"Raziye tatık bayram","kullanici":"ogretmenlikten_annelige","kategoriler":["Anne & Çocuk","Eğitim"],"sehir":"","takipci":10000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba,\n\nBen hamilelik sürecime dair doğal, samimi ve güven veren içerikler üreten bir içerik üreticisiyim. İlk bebeğimi bekliyorum. Hamilelikten başlayıp doğum ve lohusalık sürecini, ardından bebeğimle birlikte gerçek deneyimlerimi paylaşacağım. Takipçilerimle yalnızca gerçekten deneyimlediğim ve faydalı bulduğum ürünleri paylaşmayı önemsiyorum.\n\nSayfanızın ürünlerinin hedef kitlem için de ilgi ","fiyatlar":{"Reels":500,"Gönderi":500,"Hikâye":250,"Video":500}},{"id":"8094bca7-b221-4809-9c69-b5d0fc057abd","ad":"aylin sinanserdar","kullanici":"aylinarda","kategoriler":["Yaşam & Lifestyle","Moda & Güzellik"],"sehir":"İzmir","takipci":10000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Beauty, skincare ve lifestyle odaklı içerik üreticisiyim.Estetik,doğal ve dönüşüm odaklı UGC içerikleri üreterek markaların dijital görünürlüğünü güçlendirmeyi hedefliyorum. Reels, Tiktok ve kısa video formatlarında yaratıcı iş birliklerine açığım.","fiyatlar":{"Reels":4000,"Gönderi":2500,"Hikâye":750,"Video":5000}},{"id":"5f30fb3c-2756-416f-9229-8ce645b43594","ad":"nisa demirci","kullanici":"nisademirci","kategoriler":["Moda & Güzellik"],"sehir":"İstanbul","takipci":9000,"platform":["instagram","tiktok"],"dogrulanmis":false,"hakkinda":"mail: [e-posta gizlendi]\nmoda&güzellik&spor","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":1000,"Video":1000}},{"id":"925c85bb-f079-4ec4-888b-715e2a3065fe","ad":"Gizem Cengiz","kullanici":"giizemcngzz","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Seyahat"],"sehir":"İstanbul","takipci":9000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Evimde eşim ve kedilerim ile hayatın içinde yaşadığımız anların komik yansıması.","fiyatlar":{"Reels":3,"Gönderi":2,"Hikâye":1,"Video":4}},{"id":"5741b7ea-04ef-4038-96f7-dcfcbae603f9","ad":"Yağmur Bahadır","kullanici":"goc.baslasin","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yaşam & Lifestyle","Seyahat","Yemek & Mutfak"],"sehir":"Ankara","takipci":9000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"SEYAHAT SEVER, HEM YURTİÇİ HEM YURDIŞINDA KONAKLAMA YAPMAYI VE KEŞFETMEYİ SEVER","fiyatlar":{"Reels":5000,"Gönderi":3500,"Hikâye":2500,"Video":3500}},{"id":"62b9ecb1-e5da-4933-ae63-2f766cac8073","ad":"Melike Şin","kullanici":"melikeesiin","kategoriler":["Yemek & Mutfak"],"sehir":"İstanbul","takipci":9000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Merhaba, ben @melikeesiin yemek tarifleri sayfasının içerik üreticisiyim. 9135 takipçim ve 30 bin üzeri ortalama Reels izlenmem var. Ayrıca 1,3 milyon izlenmeye ulaşan bir videom bulunuyor.\n\nMarkanızla ücretli içerik üretimi ve Reels iş birliği yapmak istiyorum. İş birliği taleplerimi iletebileceğim ilgili kişi veya e-posta adresini paylaşabilir misiniz?\n\nTeşekkür ederim. 🌸","fiyatlar":{"Reels":3000,"Gönderi":3000,"Hikâye":2000,"Video":3000}},{"id":"df70ebc5-3c10-4c75-9712-a159f99defd8","ad":"aleyna yıldırır","kullanici":"aleynam20","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Seyahat"],"sehir":"İstanbul","takipci":9000,"platform":["instagram","tiktok"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Aley! TikTok’ta 62,8 bin takipçimle içerik üretiyorum. Moda, güzellik ve yaşam tarzı alanlarında yaratıcı, samimi ve dikkat çekici içerikler hazırlamayı seviyorum. Videolarımda yüksek izlenmelere ulaşıyor, takipçilerimle doğal bir bağ kurmayı önemsiyorum.\n\nMarkaların tarzını kendi içerik dilimle birleştirerek özgün ürün tanıtımları, kombin videoları ve yaratıcı iş birlikleri üretmeyi ","fiyatlar":{"Reels":4000,"Gönderi":3000,"Hikâye":1500,"Video":5000}},{"id":"4eb74a19-c917-45fe-b915-223b110a0f58","ad":"Fatma Çelik taş","kullanici":"Fatma.clkxx","kategoriler":["Moda & Güzellik"],"sehir":"Çanakkale","takipci":9000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Evli iki çocuklu Çanakkalede yaşıyorum 8500 takipçim var iş birliği yapmak isterim","fiyatlar":{"Reels":4000,"Gönderi":3000,"Hikâye":2000,"Video":5000}},{"id":"f21a4fe6-e685-4dd2-abfb-51a1d564a1b5","ad":"Nika Ören","kullanici":"Nikaorenn","kategoriler":["Yemek & Mutfak","Seyahat","Fitness & Sağlık","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":9000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"23 yaşında ve yemek tarifleri içerik üretici ev aletleri ev yemekleri tatliler ve bir sürü daha içerik üretiyorum sayfamda","fiyatlar":{"Reels":1200,"Gönderi":600,"Hikâye":750,"Video":1300}},{"id":"a97007c8-84ce-4795-82ac-7cc98f16d13d","ad":"Sezen Mirat","kullanici":"iitsmablog","kategoriler":["Yaşam & Lifestyle","Seyahat","Moda & Güzellik"],"sehir":"İzmir","takipci":8000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba hesabımı büyütmek istiyorum. Sevdiğim ve komik şeyleri paylaşmaktan mutluluk duyuyorum. Desteklerinizi bekliyorum","fiyatlar":{"Reels":2000,"Gönderi":1000,"Hikâye":750}},{"id":"91e14594-d1b7-4ae5-b0dc-d29ed52b7986","ad":"Nermin Ermiş","kullanici":"nermin_kesfediyor","kategoriler":["Yaşam & Lifestyle","Yemek & Mutfak","Moda & Güzellik"],"sehir":"Adana","takipci":8000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Merhaba 🌸 Ben Nermin, Instagram’da yemek tarifleri, yeni lezzet keşifleri, kozmetik, cilt bakımı ve günlük yaşam ürünleri üzerine içerikler üretiyorum.\n\nÜrünleri doğal ve samimi bir şekilde tanıtarak takipçilerimle deneyimlerimi paylaşmayı seviyorum. Hem mutfak hem de güzellik ve bakım alanlarında markalarla güzel iş birlikleri yapmayı hedefliyorum.\n\nMarkanızın ürünlerini deneyimleyerek özenli, d","fiyatlar":{"Reels":500,"Gönderi":250,"Hikâye":400,"Video":600}},{"id":"7abce694-74d4-4333-9891-800a9bfe42c2","ad":"Esra çolak","kullanici":"By.esracolak","kategoriler":["Teknoloji","Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"Trabzon","takipci":8000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba,\n\nBen Esra Çolak. Instagram’da @byesracolak hesabında moda, güzellik ve günlük yaşam odaklı içerikler üretiyorum.\n\nYaklaşık 7.000 takipçiden oluşan aktif bir kitleye hitap ediyorum. İçeriklerimde samimiyet, estetik ve güvenilirliği ön planda tutarak Reels, gönderi ve hikâye formatlarında düzenli paylaşımlar yapıyorum.\n\nMarkalarla uzun vadeli ve kaliteli iş birlikleri kurmayı hedefliyorum. ","fiyatlar":{}},{"id":"e3b5c079-4a8d-49c2-a75c-9656fded9deb","ad":"kader uğur aslan","kullanici":"linosca","kategoriler":["Anne & Çocuk","Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"","takipci":7000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"merhaba, 33 yaşında 14 aylık bir kız annesiyim. İstanbul'da yaşıyoruz. Kızımla beraber sosyal medyada büyümeye geldik :)","fiyatlar":{}},{"id":"63b7b01f-cab9-4584-9de7-daaa0c6eba92","ad":"Nezahat inan","kullanici":"nezosunhayati","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk","Moda & Güzellik"],"sehir":"Kırklareli","takipci":7000,"platform":["instagram","youtube"],"dogrulanmis":true,"hakkinda":"Merhaba, ben Nezahat İnan. YouTube ve Instagram’da yemek tarifleri, mutfak, temizlik, ev yaşamı ve günlük vlog içerikleri üretiyorum. Samimi ve özgün paylaşımlarımla takipçilerimle güvene dayalı bir bağ kuruyorum. Özellikle mutfak, gıda, temizlik ve ev yaşamı alanındaki markalarla PR çalışmaları, ürün tanıtımları ve uzun vadeli iş birlikleri gerçekleştirmekten mutluluk duyarım. Markanızın hikâyesi","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":1000,"Video":1000}},{"id":"af43dfc1-d6c5-4b66-a7e9-8f788bd5ed8f","ad":"Betül atalay","kullanici":"the_adenimo","kategoriler":["Seyahat","Yaşam & Lifestyle","Anne & Çocuk","Eğitim","Teknoloji"],"sehir":"Ankara","takipci":7000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Betül! 🎨✨\n\nÇizim, dijital illüstrasyon ve karakter tasarımı üzerine içerikler üretiyorum. @the_adenimo hesabımda kendi çizim dünyamı paylaşırken; çizim eğitimleri, yaratıcı süreçler, karakter tasarımları ve sanat ürünlerini içeriğe dönüştüren özgün çalışmalar hazırlıyorum.\n\nÖzellikle sanat & hobi, kırtasiye, dijital çizim, teknoloji, çocuk ve yaratıcı yaşam alanındaki markalarla çalı","fiyatlar":{"Reels":2500,"Gönderi":1000,"Hikâye":500,"Video":3500}},{"id":"3d90db72-37f7-4726-8d41-37b40ee80890","ad":"Elçin kaplan","kullanici":"Peranin_dunyasi","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Seyahat","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"İzmir","takipci":7000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Çocuk&aile, lifestyle, deneyimlediğimiz ürün ve mekanları paylaşmayı seviyoruz","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":1000,"Video":2500}},{"id":"5b3ef0e9-2aab-4441-993f-9983d13f4a0c","ad":"Ayşegül Altunbulak","kullanici":"aysegul.altnblk","kategoriler":["Moda & Güzellik"],"sehir":"Bursa","takipci":7000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Güzellik, makyaj, cilt bakımı ve lifestyle alanlarında içerik üretiyorum. Ürünleri yalnızca tanıtmak yerine kendi deneyimimi ve samimi yorumlarımı takipçilerimle paylaşmayı önemsiyorum. Reels, Story ve UGC formatlarında; estetik, doğal ve dikkat çekici içerikler hazırlıyorum. Özellikle güzellik, kozmetik, kişisel bakım, parfüm ve lifestyle markalarıyla yaratıcı projelerde yer almak ve uzun vadeli ","fiyatlar":{"Reels":5000,"Gönderi":5000,"Hikâye":2500,"Video":6000}},{"id":"6bd2fc77-2a2c-4ad7-be6c-4bd4fe6303ec","ad":"Hatice Betül Göksun","kullanici":"Btlgksn","kategoriler":["Seyahat","Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Aydın","takipci":6000,"platform":["tiktok","twitter","instagram"],"dogrulanmis":false,"hakkinda":"Doğa sever , dansçı , aşk dolu ve yaşam sevinci dolu daime üretmeye açık ve kendinden emin biriyim . 2 kedi annesiyim başak burcuyum , daima samimi ve pozitif birisiyim","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":300,"Video":1000}},{"id":"f3c8f8be-c8b4-4599-b3de-15fe275278c6","ad":"Seher Meriç","kullanici":"yolgezeryollarda","kategoriler":["Yaşam & Lifestyle","Seyahat"],"sehir":"Ankara","takipci":6000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Uzun yıllar Aselsan'da çalıştıktan sonra şimdi Hacettepe Üniversitesinde ve farklı kurumlarda fotoğrafçılık dersi veriyorum. Geziyor, fotoğraf çekiyor, kitap yazıyor ve tur rehberliği yapıyorum. Detaylı cv'de gönderebilirim.","fiyatlar":{}},{"id":"eb91a275-c3bc-4846-81b7-d0d02dd7447b","ad":"serkan","kullanici":"Jackson","kategoriler":["Seyahat","Teknoloji","Yaşam & Lifestyle"],"sehir":"İzmir","takipci":6000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Uluslararası sanatçıların, müzik dünyasının ve unutulmaz performansların yer aldığı kısa videolar paylaşıyorum. Özellikle Michael Jackson içeriklerine odaklanıyor, sanatçıların özel anlarını ve müzik tarihine damga vuran görüntülerini takipçilerimle buluşturuyorum. Markalarla ve içerik üreticileriyle yaratıcı, karşılıklı fayda sağlayan iş birliklerine açığım.","fiyatlar":{"Reels":50}},{"id":"e3939a97-a385-48a8-a15b-169d2b86f9ef","ad":"Latife Güney","kullanici":"Denemelisin_lg","kategoriler":["Yemek & Mutfak"],"sehir":"İstanbul","takipci":6000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Merhaba! Ben @denemelisin_lg 👩🏻‍🍳\nTatlı tarifleri, tuzlu lezzetler ve mutfakta hayatı kolaylaştıran pratik bilgiler paylaşıyorum.\nAmacım, takipçilerime deneyebilecekleri tarifler sunarken markaların ürünlerini de doğal, yaratıcı ve güven veren içeriklerle buluşturmak.\n✨ Reels içeriklerim ortalama 5.000–20.000 görüntülenmeye ulaşıyor. İki tane de 700 bin izlenme reelsim mevcut.\n\nProfilim 1,5 mn ","fiyatlar":{"Reels":1500,"Gönderi":1000,"Hikâye":1000,"Video":2000}},{"id":"e70727bb-f078-44f0-a880-e0786359dc65","ad":"Esra Nebil","kullanici":"Esranebil","kategoriler":["Yaşam & Lifestyle","Teknoloji","Moda & Güzellik","Fitness & Sağlık"],"sehir":"Giresun","takipci":6000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Esra İçerik Üretici Olmak İstiyorum","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":1000,"Video":1000}},{"id":"aef672e1-e8d8-4061-9422-a3237ce7b254","ad":"Ayzit öztürk","kullanici":"helloayzit","kategoriler":["Seyahat","Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Ankara","takipci":6000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Seyahat ve seyahate\nYönelik her detayla ilgili içerikler üretiyorum, nerelerde neler yapılır,\nGötürülür, giyilir, kullanılır kısacası bir seyahat için a’dan z’ye her şeyi takipçilerime geçirmeye çalışıyorum. Ücretli İş birliği, barter, affiliete \nVe ugc olarak her türlü iş birliğine açığım","fiyatlar":{"Reels":5000,"Gönderi":3000,"Hikâye":1000,"Video":5000}},{"id":"e974e7f1-fa45-4589-8f76-bd30557c3711","ad":"Rumeysa Baydar","kullanici":"Defneyleanne","kategoriler":["Seyahat","Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"Muğla","takipci":6000,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Bir yaşında Bebeğimle birlikte içeklikler paylaşıyorum","fiyatlar":{"Reels":1000,"Gönderi":100,"Hikâye":100,"Video":2000}},{"id":"7aadf166-4918-41af-96ff-c8ec0b51b717","ad":"Eskişehir Yaşam","kullanici":"eskevent_","kategoriler":["Seyahat","Yaşam & Lifestyle","Yemek & Mutfak","Eğitim"],"sehir":"Eskişehir","takipci":5000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Eskişehir'de gezi, mekan içerikleri üretip eventler düzenleyen bir sayfayız.","fiyatlar":{"Reels":5000,"Gönderi":4000,"Hikâye":1500}},{"id":"afdf1fa6-50f2-4447-930a-701ed0d1e2f4","ad":"Aleyna Yalkın","kullanici":"aleynaasblog","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"Balıkesir","takipci":5000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Merhaba İşbirliğim ekibi 🌸\n\nBen Aleyna. @aleynaasblog hesabımda yemek, mutfak ve yaşam alanlarında içerikler üretiyorum.\n\nUGC alanında kendimi geliştiriyor, markalar için doğal, samimi ve estetik ürün tanıtım videoları hazırlıyorum.\n\nÖzellikle gıda, mutfak gereçleri, ev yaşamı ve günlük kullanım ürünleri kategorilerinde ücretli içerik projelerinde yer almak istiyorum.\n\nDaha önce gerçekleştirdiğim","fiyatlar":{"Reels":2000,"Gönderi":1000,"Hikâye":800,"Video":2000}},{"id":"35611aa7-0cb7-4e3b-84cd-a51a32d797c2","ad":"özgür turgut","kullanici":"yesilcamgunleri1970","kategoriler":["Teknoloji"],"sehir":"Samsun","takipci":5000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"sosyal medya içerik üreticisi","fiyatlar":{"Reels":500,"Gönderi":300,"Hikâye":200,"Video":350}},{"id":"f53253bc-a334-4e86-b40a-e72941346738","ad":"aynur çulha","kullanici":"aynurculha35","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Moda & Güzellik","Fitness & Sağlık","Eğitim"],"sehir":"İstanbul","takipci":5000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Aynur, İzmirliyim ve sporcuyum. Yaşamımın bir çok alanında içerik üretiyorum. Çoğu kişinin samimi, içten ve gerçek kullanıcı yorumuna ihtiyacı olduğunu düşünüyorum. Pozitif enerjimin kameralardan bir çok kişiye yansıyacağına ve hayatlarıma dokunacağına eminim, bu yolculukta benimle olmandan mutluluk duyarım❤️","fiyatlar":{"Reels":5000,"Gönderi":3000,"Hikâye":1500,"Video":5000}},{"id":"d44752ff-187d-4100-af6f-ee5628f2c842","ad":"Hilal kart","kullanici":"cleaningwithhilal","kategoriler":["Yaşam & Lifestyle","Eğitim"],"sehir":"Bursa","takipci":5000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Hilal. Temizlik ve ev yaşamı üzerine özgün içerikler üreten bir içerik üreticisiyim. Takipçilerime güvenilir ürün önerileri sunmayı önemsiyorum. Markanızla keyifli ve uzun soluklu bir iş birliği yapmayı çok isterim.","fiyatlar":{}},{"id":"9c30ce05-4159-4fe5-8867-6fdd021b9cde","ad":"Hilal tetik","kullanici":"yagmurh___","kategoriler":["Yaşam & Lifestyle","Moda & Güzellik"],"sehir":"Kocaeli","takipci":5000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Selammm\nMakyaj-Cilt bakımı-Lifestyl içerikleri üretiyorum.","fiyatlar":{"Reels":6000,"Gönderi":2000,"Hikâye":1000,"Video":6000}},{"id":"d216bcb0-23d6-48c4-995b-9b839910c865","ad":"Zuleyha Kilincarslan","kullanici":"Gurbette_1_Zuleyha","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Seyahat","Yaşam & Lifestyle"],"sehir":"","takipci":5000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"New York ‘ta yasiyorum instagram sayfamda belli bir kitleye eglenceli reels’çekerek beğeni topluyorum reklam iş birliği yapmak istiyorum ve başarili olacağima eminim","fiyatlar":{"Reels":25,"Gönderi":15,"Hikâye":5000,"Video":25}},{"id":"79b32ceb-902f-4351-8680-53e3145d768c","ad":"Hansa Karaduman","kullanici":"pharmadermm","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":4000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Eczacıyım. Dermokozmetik ürün icerikleri ve ürün tanıtımı yapıyorum günlük yaşam vlog tarzı paylaşımlar evcil hayvanım ve müzik ile ilgili paylaşımlar da mevcut","fiyatlar":{"Reels":500,"Gönderi":300,"Hikâye":150,"Video":500}},{"id":"23779e2c-98cd-4004-84bd-f472947049d0","ad":"Narges marzou","kullanici":"m_hossein_iran","kategoriler":["Anne & Çocuk"],"sehir":"Afyonkarahisar","takipci":4000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba! Oğlum Muhammed Hüseyin'in günlük yaşamını ve özel anlarını paylaşıyorum. Markalarla iş birliği yapmaya ve özgün içerikler üretmeye açığım.","fiyatlar":{"Reels":750,"Gönderi":500,"Hikâye":250,"Video":500}},{"id":"414be916-aa94-41cd-8185-0216af6802b9","ad":"Özge onatca","kullanici":"Ozgeonatca","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Seyahat","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":4000,"platform":["tiktok"],"dogrulanmis":false,"hakkinda":"24 yaşındayım. İstanbulda yaşıyorum. Tiktok içerik üreticisiyim. Freelance modellik yapıyorum.","fiyatlar":{"Reels":12000,"Gönderi":8000,"Hikâye":3000,"Video":13000}},{"id":"86a43b5d-9cb1-40e9-9312-b5be82eaac03","ad":"Gamze Önder","kullanici":"gamzee_onderr","kategoriler":["Teknoloji","Moda & Güzellik","Fitness & Sağlık","Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk","Eğitim","Otomotiv"],"sehir":"İzmir","takipci":4000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Evli 4 çocuk annesi kendi halinde tatlı bir aile.","fiyatlar":{"Reels":3000,"Gönderi":3000,"Hikâye":2000,"Video":3000}},{"id":"6a19aabb-099a-4b80-8442-832af12cfc3d","ad":"Rabia kazgan","kullanici":"Benrabiamesela","kategoriler":["Yemek & Mutfak"],"sehir":"Ağrı","takipci":4000,"platform":["instagram","youtube"],"dogrulanmis":false,"hakkinda":"Ağrı'da yaşıyorum; Instagram ve YouTube Shorts platformlarında yemek tarifleri, geleneksel lezzetler ve pratik ev/mutfak düzeni içerikleri üreten bir içerik üreticisiyim. Sayfamda Fissler gibi hayatı kolaylaştıran kaliteli mutfak ekipmanlarını ve estetik ev yaşamı tüyolarını samimi ve şık bir dille takipçilerimle buluşturuyorum. Markalarınızla gerçekleştireceğimiz iş birliklerinde; iştah kabartan ","fiyatlar":{"Reels":1000,"Gönderi":250,"Hikâye":100,"Video":1000}},{"id":"cb266781-ab3d-4373-a883-01bcfa4bf02e","ad":"Seda ağyıldırım","kullanici":"sedaagyildirim","kategoriler":["Yaşam & Lifestyle"],"sehir":"Antalya","takipci":4000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"37 yaşında Antalya da yaşıyorum enerjik bir yapım var ve sosyal medyada eğlenceli reels içerik üretiyorum","fiyatlar":{"Reels":3000,"Gönderi":2000,"Hikâye":2000}},{"id":"34d65d8e-ed02-4861-9e8e-f502aa6d95f5","ad":"Gamze Türkmen","kullanici":"gamzeturkmenn","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Seyahat"],"sehir":"Antalya","takipci":4000,"platform":["instagram","tiktok"],"dogrulanmis":true,"hakkinda":"Merhaba,Anadolu Üniversitesi Moda Tasarım bölümü mezunuyum.Hesabımda günlük yaşantımla alakalı paylaşımlar yapıyorum.Özellikle kombin videoları çekmeyi seviyorum.","fiyatlar":{}},{"id":"619f7e2d-8773-4886-b665-b01befe34caf","ad":"Çağrı Acar","kullanici":"cagriacar","kategoriler":["Eğitim"],"sehir":"İstanbul","takipci":4000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"22 yaşında Hukuk fakültesi öğrencisiyim. Sosyal medya platformalarında hukuk temalı insanların haklarını öğrenmesi ve siyaset temalı videolar üretmekteyim.","fiyatlar":{}},{"id":"b7ea6bb6-293e-4740-b9cc-73a540aadd47","ad":"Muhammet gençtanır","kullanici":"muhammetgnc2","kategoriler":["Seyahat","Yaşam & Lifestyle"],"sehir":"Gaziantep","takipci":4000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"3200 takipçili motovlog hesabım var işbirliklerine açığım","fiyatlar":{"Reels":500,"Gönderi":250,"Hikâye":250}},{"id":"b1d38d6e-c858-426d-ba95-9f66d81dd56b","ad":"Erdoğan Akgül","kullanici":"akgul.erdogan","kategoriler":["Yaşam & Lifestyle"],"sehir":"Antalya","takipci":3000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Antalya kıyılarında on iki ay denizle iç içe yaşayan biriyim. Sub board ve tekne ile balık avları yapıp, kıyıdan gizli koy ve mağara keşifleri yapıyorum.","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":1000,"Video":1750}},{"id":"b1e3527c-6f6c-4327-8631-e21e6a33e181","ad":"Cüneyt Alkış","kullanici":"yasayansehir_tr","kategoriler":["Seyahat","Yaşam & Lifestyle"],"sehir":"Bursa","takipci":3000,"platform":["instagram","youtube"],"dogrulanmis":true,"hakkinda":"Yaşayan Şehir adlı dijital içerik platformunun kurucusu ve içerik üreticisiyim. Başta Bursa olmak üzere şehir kültürü, tarih, kent hafızası ve yaşam üzerine belgesel, video ve sosyal medya içerikleri üretiyorum. Aynı zamanda halkla ilişkiler, kurumsal iletişim, dijital medya ve içerik pazarlaması alanlarında çalışmalar yürütüyorum. Özgün hikâye anlatıcılığını yaratıcı dijital iletişimle buluşturma","fiyatlar":{"Reels":4000,"Gönderi":2000,"Hikâye":1000,"Video":8000}},{"id":"5d54746c-0f3e-4cb4-bf65-123942711681","ad":"Öznur Tokur Uçan","kullanici":"istanbullugelinden","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"Erzurum","takipci":3000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Öznur, İstanbul’dan Erzurum’a gelin geldim ve burada kendime yeni bir sayfa açtım. Yaptığım yemekleri, gezdiğim yerleri ve denediğim yeni tatları hesabımda paylaşıyorum. 3 bin küsür takipçim var, iletişimimiz kuvvetli ve sıcak🌺","fiyatlar":{"Reels":5000,"Gönderi":5000,"Hikâye":2000,"Video":5000}},{"id":"327c0c8e-3d16-4c67-91d1-8db1a9887a67","ad":"Dilara Gül","kullanici":"diilasaaa","kategoriler":["Yemek & Mutfak","Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Kastamonu","takipci":3000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba! Ben Dilara. 💌\n\nYaşam tarzı, mutfak, güzellik ve stil içerikleri üretiyorum. Takipçilerimle doğal ve samimi bir bağ kurmayı seviyor, kullandığım ve beğendiğim ürünleri kendi deneyimlerimle paylaşıyorum. Yaratıcı Reels içerikleri hazırlamaktan büyük keyif alıyorum ve markalarla birlikte güzel projelerde yer almayı çok isterim. 🤍","fiyatlar":{}},{"id":"7e4ca7b7-d8d7-485b-bd3b-899c2555cf89","ad":"Sude Bayram","kullanici":"bisamontiya","kategoriler":["Teknoloji","Yemek & Mutfak","Gaming","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":3000,"platform":["instagram","tiktok"],"dogrulanmis":true,"hakkinda":"Merhaba,Ben Sude. Instagram ve TikTok'ta eğlence, mizah, oyun ve teknoloji alanlarında içerikler üretiyorum. Instagram'da yaklaşık 2.000 takipçim var ve Reels videolarım ortalama 1.000–5.000 görüntülenmeye ulaşıyor.\n\nYaratıcı, samimi ve doğal içerikler üretmeyi; takipçilerimle etkileşim kurmayı seviyorum. Markaların ürünlerini kendi içerik tarzıma uygun şekilde tanıtarak özgün ve ilgi çekici işbir","fiyatlar":{"Reels":750,"Gönderi":500,"Hikâye":250,"Video":750}},{"id":"c91366f7-8782-4316-9602-35038e235eea","ad":"Buse yılmaz","kullanici":"buseyılmaz","kategoriler":["Moda & Güzellik"],"sehir":"Kocaeli","takipci":3000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"2 ay önce içerik üretmeye başladım fakat iyi ilerlediğimi düşünüyorum. Birçok büyük küçük firmayla barter usulü içerik çekimi yaptım ve güzel geri dönüşler aldım","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":1000,"Video":2000}},{"id":"e09a06cd-acbd-4cd9-94f0-c401ce87240d","ad":"Kevser Boz","kullanici":"gelisimcee_blog","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Fitness & Sağlık","Seyahat","Yemek & Mutfak"],"sehir":"Düzce","takipci":3000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Gelişimce markası altında; hamilelik, bebek ve çocuk gelişimi odaklı yapay zeka destekli dijital içerikler üretiyorum. Yapay zekasız dijital içerikte dahil . 30 günde 120 B görüntülemem var . Yeni anneler ve anne-baba adayları için faydalı ipuçları sunduğum kitlemle kurduğum güçlü ve güvene dayalı bağı, markanızın hedef kitlesiyle buluşturacak kreatif iş birlikleri yapmayı hedefliyorum.","fiyatlar":{"Reels":1500,"Gönderi":1000,"Hikâye":750,"Video":1500}},{"id":"751ab7a7-45ff-4747-b9ad-bc615c37fc03","ad":"Gökçen Yılancıoğlu","kullanici":"Gokcenyln","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"","takipci":3000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Gökçen,\nYaklaşık 3-4 aydır instagrama içerik üretiyorum. İçeriklerim samimi ve içten, erkek arkadaşımla çift içerikleri de üretiyorum.","fiyatlar":{"Reels":250,"Gönderi":150,"Hikâye":100,"Video":300}},{"id":"df76695d-08ef-47d8-a2aa-24cc6d96d480","ad":"Esra vuran","kullanici":"esravurannn","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Seyahat"],"sehir":"Kocaeli","takipci":3000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Aktif seyahat ederim 32 yaşındayım 160 boy 50 kiloyu","fiyatlar":{"Reels":3,"Gönderi":3,"Hikâye":3,"Video":3}},{"id":"05f421ad-2cc4-4cfe-a97e-c73f40c1634e","ad":"Tuba ataman","kullanici":"Tubayla50yasam","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":3000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"40+ kadınlara ilham veren içerikler üretiyorum. Renk analizi, makyaj, cilt bakımı, pilates ve yaşam tarzı alanlarında samimi UGC içerikleri hazırlıyor, markaları hedef kitlemle doğal bir şekilde buluşturuyorum.","fiyatlar":{"Reels":2000,"Gönderi":1000,"Hikâye":500,"Video":2000}},{"id":"5b7dceed-48b6-4689-9745-4512d326da4c","ad":"Esra aydın çeçeli","kullanici":"esraaydnccli","kategoriler":["Moda & Güzellik","Seyahat","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"Nevşehir","takipci":3000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"33yaşındayım Nevşehir de yaşıyorum evliyim bir oğlum var günlük hayat paylaşıyorum","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":300,"Video":1000}},{"id":"aef8d29c-42f3-4172-b376-24e70bd0c46b","ad":"Tuğçe ceylan","kullanici":"Tugcecyllann","kategoriler":["Moda & Güzellik","Anne & Çocuk","Eğitim","Yemek & Mutfak"],"sehir":"Çorum","takipci":2000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Öncelikle serbest muhasebeciyim evliyim bir tane bebeğim var 10 aylık içeriklerim bazen iş bazen bebeğim ve kalalım ortamlarda dikkat çeken doğal paylaşımlar yapmayı seviyorum yani hem anne hem iş hayatına devam eden bir kadın","fiyatlar":{"Reels":1000,"Gönderi":100,"Hikâye":1000,"Video":1500}},{"id":"0dea4d55-2c80-4b48-89af-f597d6d99e22","ad":"Bahar aygün","kullanici":"Kesifceyasa","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Anne & Çocuk","Seyahat","Yaşam & Lifestyle","Otomotiv","Teknoloji"],"sehir":"Ankara","takipci":2000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Bahar. Lisans mezunuyum ve daha önce yaklaşık 2 yıl kurumsal iş deneyimi edindim. Şu anda bebeğimle ilgilendiğim için evden içerik üretiyorum. Fotoğraf ve video çekmeyi, estetik içerikler hazırlamayı ve yapay zekâ destekli görsel üretim araçlarını kullanmayı seviyorum. Markaların ürünlerini doğal, güven veren ve yaratıcı bir şekilde tanıtarak hedef kitleye ulaşmasına katkı sağlamayı h","fiyatlar":{}},{"id":"ca5526a4-5e88-4de2-b6e3-d67d8edf6c3b","ad":"Fatoş shl","kullanici":"anneogul","kategoriler":["Teknoloji","Seyahat","Anne & Çocuk","Yemek & Mutfak","Eğitim"],"sehir":"Antalya","takipci":2000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Merhabalar ben 5 yaşındaki oğlum ile birlikte içerik üretiyorum gerçek hayattan sizler ile de çalışmak isterim","fiyatlar":{}},{"id":"7aa91e58-51d8-4aaa-947c-ab1a3aa3f343","ad":"sıla özen kurnaz","kullanici":"silaozeen","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Yemek & Mutfak","Seyahat"],"sehir":"Balıkesir","takipci":2000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"25 yaşındayım. Lifestyle seyahat bakım makyaj kombin yapma gibi hayata dair içerikler üretmeyi seviyorum","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":1000,"Video":1000}},{"id":"fbd26ee5-ba25-4356-8632-6e3c37d1d019","ad":"Seher Bağırtkan","kullanici":"seherinminikmutfagi","kategoriler":["Yemek & Mutfak","Anne & Çocuk"],"sehir":"","takipci":2000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"27 yaşındayım evliyim 7 aylık oğlum var ona verdiğim ürünler ile ilgili reels videoları üretiyorum içerik olarak ek gıda sayfasıyım","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":500,"Video":1000}},{"id":"708d7858-9bcf-44ce-a234-d31b403a32f6","ad":"Mehmet Ömer Bülbül","kullanici":"Ayseomerblbl","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Teknoloji","Fitness & Sağlık"],"sehir":"Isparta","takipci":2000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba! Biz birlikte içerik üretmeyi seven, samimi ve yaratıcı bir çiftiz. Instagram hesabımızda eğlenceli çift videoları, günlük yaşam, kombin, bakım ve ürün deneyimi içerikleri paylaşıyoruz. Markaların ürünlerini kendi tarzımızla, doğal ve dikkat çekici Reels videolarıyla takipçilerimize tanıtmayı hedefliyoruz. Özgün fikirlerimiz, samimi anlatımımız ve kaliteli içerik üretme konusundaki özenimi","fiyatlar":{"Reels":1500,"Gönderi":1000,"Hikâye":1000,"Video":2500}},{"id":"e900c6f9-6041-465e-9160-ee4d5d7a048b","ad":"Kübranur Kartal","kullanici":"kubranur06v","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Seyahat","Yemek & Mutfak","Teknoloji"],"sehir":"Ankara","takipci":2000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"25 yaşında Ankara'da yaşayan life style, kombin, makyaj ve güzellik üzerine video içerik üreticisiyim","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":300,"Video":1000}},{"id":"fb4114b5-3a48-40d8-99c0-95634d5b9dc5","ad":"İrem coşkun","kullanici":"iremm_canerlogg","kategoriler":["Yemek & Mutfak","Eğitim","Anne & Çocuk","Seyahat","Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Tekirdağ","takipci":2000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba! Ben İrem Coşkun. Instagram'da (@iremm_canerlog) günlük rutinler, samimi annelik halleri, pratik ipuçları ve ek gıda tarifleri üzerine samimi ve doğal içerikler üretiyorum. Takipçilerimle güvene dayalı, samimi ve ilham veren bir bağ kurmaya özen gösteriyorum. Markanızın ürünlerini kitleme en doğal ve etkili şekilde tanıtmak için sabırsızlanıyorum!","fiyatlar":{"Reels":750,"Gönderi":300,"Hikâye":200,"Video":800}},{"id":"6394b5a8-19d6-4110-8ab6-15f88c1a0c02","ad":"Songül Gümüş","kullanici":"songulgumusss","kategoriler":["Moda & Güzellik"],"sehir":"İstanbul","takipci":2000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, 25 yaşındayım. Tekstil sektöründe 6 yıllık bir iş tecrübesine sahibim. Giyinmeyi, modayı ve makyaj yapmayı çok seviyorum.","fiyatlar":{"Reels":7000,"Gönderi":5000,"Hikâye":1000,"Video":6000}},{"id":"df3fed70-f412-4574-a4c7-91e88a7f3764","ad":"Simay ateş","kullanici":"simayyatesss","kategoriler":["Moda & Güzellik"],"sehir":"Edirne","takipci":2000,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Sosyal medya platformlarında kendime özgü makyaj konsepti ile yaratıcı video içerikleri üretiyorum","fiyatlar":{}},{"id":"aa0e236d-ee97-457a-8306-b4761055b144","ad":"Göksu Mandacı","kullanici":"Goksum1","kategoriler":["Moda & Güzellik","Seyahat"],"sehir":"Edirne","takipci":2000,"platform":["tiktok","twitter","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Göksu. Makyaj, güzellik, moda ve lifestyle alanlarında doğal ve estetik UGC içerikleri üretiyorum. Kamera karşısında rahatım ve ürünleri samimi, günlük yaşamın içinden bir anlatımla tanıtmayı seviyorum. Markaların hedef kitlesine doğal şekilde ulaşmasını sağlayacak yaratıcı ve dikkat çekici içerikler üretmek için buradayım.","fiyatlar":{}},{"id":"8610f253-eeff-4fd2-84f8-23cfc33b36c1","ad":"Cemile Sena Karaköse","kullanici":"c.senakarakose","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Teknoloji","Eğitim"],"sehir":"Bursa","takipci":2000,"platform":["instagram","youtube","tiktok"],"dogrulanmis":false,"hakkinda":"Avukat ve içerik üreticisiyim. Günlük hayatı biraz hukuk gözünden anlatıyor; güncel gelişmeler, popüler kültür, lifestyle, beauty ve teknoloji üzerine içerikler üretiyorum. Kendi tarzıma ve takipçi kitleme doğal şekilde uyum sağlayan yaratıcı marka işbirliklerine açığım.","fiyatlar":{}},{"id":"9823a36d-ff21-4b11-84af-161f1975ba8d","ad":"Elifsu Aydoğmuş","kullanici":"elifsu.aydogmuss","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Eğitim"],"sehir":"Kocaeli","takipci":2000,"platform":["instagram","youtube","tiktok"],"dogrulanmis":false,"hakkinda":"PDR 4. sınıf, Grafik Tasarımı 2. sınıf öğrencisiyim. Yaşam tarzı, kişisel gelişim ve günlük hayat üzerine yaratıcı içerikler üretiyorum. Yeni şeyler keşfetmeyi, deneyimlerimi paylaşmayı ve markalarla özgün iş birlikleri yapmayı seviyorum.","fiyatlar":{"Reels":600,"Gönderi":200,"Hikâye":200,"Video":1000}},{"id":"66a64cd7-5218-4e58-af0c-4608e929184a","ad":"Beyzanur inanlı","kullanici":"inanliailesii","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Yemek & Mutfak"],"sehir":"İstanbul","takipci":2000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Genç bir annenin bebeğiyle büyüme serüveni ve günlük rutinlerini paylaşmaktayım","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":250,"Video":1000}},{"id":"1384c114-7edd-457a-aebc-a9a1d5fc1397","ad":"Melisa sancar","kullanici":"melisagloww","kategoriler":["Moda & Güzellik"],"sehir":"Bursa","takipci":2000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Melisa! 💕 Güzellik, makyaj ve kişisel bakım alanlarında içerik üreten bir içerik üreticisiyim. Aynı zamanda Rossmann’da satış danışmanı olarak çalışıyor, kozmetik ve bakım ürünleriyle yakından ilgileniyorum.\n\nÜrünleri deneyimlemeyi, özelliklerini keşfetmeyi ve takipçilerimle samimi, yaratıcı ve güvenilir içerikler paylaşmayı seviyorum. Markaların ürünlerini kendi tarzımla tanıtarak d","fiyatlar":{}},{"id":"720bd049-2e49-42be-b8c5-8adcd510a4e1","ad":"Gamze Özdemir","kullanici":"Pelteek","kategoriler":["Moda & Güzellik"],"sehir":"İstanbul","takipci":2000,"platform":["tiktok"],"dogrulanmis":false,"hakkinda":"Makyaj, bakım, kendin yap fikirleri ve günlük yaşam içerikleri üreten bir içerik üreticisiyim. Takipçilerimle gerçek deneyimlerimi paylaşarak faydalı ve samimi içerikler hazırlıyorum. Yeni ürünleri denemeyi, yorumlamayı ve günlük hayatı kolaylaştıran önerileri paylaşmayı seviyorum.","fiyatlar":{}},{"id":"e7c2e0c6-ed91-4951-afbf-2eb7cc8fe447","ad":"ebrar başer","kullanici":"ebrar.srkc","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":2000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Beauty, hair, fashion & lifestyle içerikleri üreten TikTok creator. Ürün deneyimi, GRWM, kombin ve doğal ürün tanıtımı içerikleri üretiyorum.","fiyatlar":{}},{"id":"c150dcbd-9948-4943-b945-2dcae03adfaf","ad":"Ayfer Dilli","kullanici":"ayfer_zeynel33","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Karaman","takipci":2000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Ayfer Dilli 27 yaşındayım Erciyes üniversitesi havacılık yönetimi bölümü mezunuyum. Makyaj /bakım ve güzellik üzerine içerik üretiyorum.","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":1000,"Video":1000}},{"id":"4aa35169-45b4-4099-9c23-8e36192abb21","ad":"Sümeyra yılmaz","kullanici":"wielshome","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle","Seyahat","Anne & Çocuk"],"sehir":"Trabzon","takipci":1000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Kadın girişimciyim sunum yapmayı sofra kurmayı cok seviyorum dekorasyon yapmayı da çok seviyorum","fiyatlar":{"Reels":15000,"Gönderi":10000,"Hikâye":2000,"Video":20000}},{"id":"616afa3e-e407-4364-9bf3-e469619463c4","ad":"Betül akkoç","kullanici":"tarifcims","kategoriler":["Anne & Çocuk","Yemek & Mutfak","Yaşam & Lifestyle","Seyahat","Teknoloji"],"sehir":"Ankara","takipci":1000,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"İnstagramda yemek tarifi videoları çekiyorum bebeğim için tarifler ürünler deniyorum","fiyatlar":{"Reels":1,"Gönderi":1,"Hikâye":1,"Video":1}},{"id":"d9dbd21d-d942-4938-8f6b-2b3d14589491","ad":"özge yöndemli","kullanici":"mashmelovezge","kategoriler":["Eğitim","Moda & Güzellik"],"sehir":"Sakarya","takipci":1000,"platform":["tiktok"],"dogrulanmis":true,"hakkinda":"Merhaba! 🎀 TikTok hesabımda ders çalışma rutinleri, study vloglar, öğrenci hayatı, makyaj ve günlük yaşam üzerine içerikler üretiyorum.","fiyatlar":{"Reels":100,"Gönderi":100,"Video":1000}},{"id":"12cb9df0-c40c-4022-90c8-e1780f16f279","ad":"İpek Akkan","kullanici":"ipekakkan","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"Tekirdağ","takipci":1000,"platform":["tiktok"],"dogrulanmis":false,"hakkinda":"28 yaşında endüstri mühendisiyim, 5 senedir uzaktan çalışıyorum aynı zamanda alışveriş, güzellik yaşam stili, sunum yemek yeni keşifler seyahatler üzerine içerik üretiyorum","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":500,"Video":1000}},{"id":"99c64eb3-907a-4aab-a5a3-377bd0a75195","ad":"Ayşegül Aydoğdu","kullanici":"ayseegulaydogduuu","kategoriler":["Moda & Güzellik"],"sehir":"Bursa","takipci":1000,"platform":["instagram","tiktok"],"dogrulanmis":true,"hakkinda":"Merhaba 💗 Ben güzellik, makyaj ve lifestyle alanında içerik üreten bir influencerım. Markanızın ürünlerini ve içerik tarzını çok beğendim. Sizinle ürün tanıtımı, Reels ve Story içerikleri üzerine bir iş birliği yapmak isterim. Uygun olduğunuzda iş birliği koşullarınızı öğrenebilir miyim? Sevgiler. ✨","fiyatlar":{"Reels":3000,"Gönderi":2,"Hikâye":3,"Video":3000}},{"id":"8856a391-f194-414c-aa5a-c8ca06449c60","ad":"Bengü Süeda Yılmaz","kullanici":"sueda.core","kategoriler":["Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":1000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"duygusal içerikler paylaşıyorum","fiyatlar":{"Reels":600,"Gönderi":500,"Hikâye":250,"Video":600}},{"id":"9500a9cc-f485-4431-9955-76cf75969045","ad":"İrem gül yılmaz serter","kullanici":"iremgl_yilmaz","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yemek & Mutfak","Yaşam & Lifestyle"],"sehir":"Antalya","takipci":1000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben İrem. Optisyenim; moda, güzellik, yaşam tarzı ve sosyal medyayla ilgileniyorum. Yaratıcı, enerjik ve yeni şeyler denemeyi seven biriyim. Kendimi geliştirirken hayatımdan keyifli ve samimi anları paylaşmayı seviyorum.","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":1000,"Video":1000}},{"id":"633dd0a7-2957-4ed7-b373-dfb3094328c0","ad":"Dinara Akhunjanova","kullanici":"diinaragultekin","kategoriler":["Yaşam & Lifestyle","Seyahat","Moda & Güzellik"],"sehir":"İzmir","takipci":1000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba,ben Dinara. 27 yaşındayım. Dijital içerik üreticisiyim. 5 sene bir abiye markasının sosyal medya sorumlusu & sosyal medya uzmanı ve içerik üreticisiydim. Evlendikten sonra İzmir’e taşındım. Kendi blogumu yönetmeye karar verdim. Çekip editlediğim reels ve storylerin sayesinde kısa sürede organik takipçi sayısına ve 30 gün içerisinde 3.3M erişime sahip oldum. Dil bilgim: Türkçe Rusça Inglizc","fiyatlar":{"Reels":3500,"Gönderi":2500,"Hikâye":1000,"Video":3500}},{"id":"7a2b7cbd-085a-4643-b2b0-1a7540bfad40","ad":"Fatma Betül koç","kullanici":"Betulkocc18","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Teknoloji"],"sehir":"İstanbul","takipci":1000,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Yaşam, moda, bakım ve günlük hayat içerikleri üreten bir içerik üreticisiyim. Takipçilerimle samimi ve güvene dayalı bir bağ kurmaya özen gösteriyorum. Markanızın ürünlerinin içeriklerimle uyumlu olduğunu düşünüyorum ve birlikte güzel bir iş birliği yapabileceğimize inanıyorum.","fiyatlar":{"Reels":800,"Gönderi":1000,"Hikâye":500,"Video":1000}},{"id":"282c582d-8b1b-4623-8432-e33cd4457d81","ad":"Aleyna başbay","kullanici":"aleynabasbay","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Seyahat","Yemek & Mutfak","Moda & Güzellik"],"sehir":"Kocaeli","takipci":1000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Ben influencer yolunda ilerlemek isteyen biriyim bebegimle eşimle doğal içerikler çekiyorum çekmeye çalışıyorum ve bu yolda da bir şeyler başarabileceğime inanıyorum","fiyatlar":{"Reels":3,"Gönderi":3,"Hikâye":10,"Video":6}},{"id":"e92cc6dd-0218-4fd2-bfad-488e00e1fb69","ad":"Pınar kızar","kullanici":"Pinarkizar00","kategoriler":["Yaşam & Lifestyle"],"sehir":"Antalya","takipci":1000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Eğlenceli ve günlük yaşam tarzı videolar üretiyorum ve markanızı doğal ve eğlenceli bir şekilde tanıtabilirim","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":500,"Video":1000}},{"id":"260913f7-1f94-458e-9796-013cdad02493","ad":"Cansu Gümüş İyigün","kullanici":"withiyigun","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk","Moda & Güzellik","Eğitim"],"sehir":"Bolu","takipci":1000,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Ben Cansu Gümüş İyigün. 7 aylık bebeğimle büyüyüp keşfederken bu yolculuğu paylaşıyorum.","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":500,"Video":1000}},{"id":"9c8e7530-2b4a-4689-84ae-8f65b6778584","ad":"BETÜL GÜRBÜZ","kullanici":"aslansmoments","kategoriler":["Moda & Güzellik","Anne & Çocuk","Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":952,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba! Ben Betül. 🤍 Instagram hesabımda eşim ve oğlum Aslan ile günlük hayatımızdan samimi ve doğal anları paylaşıyorum.\n\nÖzellikle aile, annelik, bebek ürünleri ve günlük yaşam üzerine içerikler üretmeye yeni başladım. Markalarla doğal, samimi ve yaratıcı iş birlikleri yaparak birlikte güzel içerikler ortaya çıkarmayı hedefliyorum. ✨","fiyatlar":{}},{"id":"057fdb5a-8a6a-435f-aef4-a0e218222af2","ad":"Ceylin Sertyürek","kullanici":"hey.itscey","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yaşam & Lifestyle","Seyahat"],"sehir":"Manisa","takipci":835,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Ceylin. Beden eğitimi öğretmenliği son sınıf öğrencisiyim. Geçen dönem erasmustayken açtığım hesabımı büyütmeye çalışıyorum:)","fiyatlar":{"Reels":3000,"Gönderi":2000,"Hikâye":1000,"Video":2000}},{"id":"9986aaa4-2bf5-4bc5-8a81-e321e72c72e6","ad":"Ebru KARLIDAĞ","kullanici":"Sarikafaveannesi","kategoriler":["Anne & Çocuk","Eğitim","Seyahat","Yaşam & Lifestyle","Yemek & Mutfak","Fitness & Sağlık","Moda & Güzellik","Teknoloji"],"sehir":"Sakarya","takipci":829,"platform":["youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Ebru. Kimya lisans mezunuyum ve UGC içerik üreticisiyim. Anne-bebek, yaşam ve ev yaşamı alanlarında ürünleri gerçek kullanım deneyimiyle tanıtan, doğal ve güven oluşturan video içerikleri hazırlıyorum. Amacım markaların hedef kitlesiyle güçlü bir bağ kurmasına katkı sağlayan özgün içerikler üretmek.","fiyatlar":{"Reels":1000,"Gönderi":2000,"Hikâye":1000,"Video":2000}},{"id":"070f4a13-62be-4392-ba77-4ec799fb1772","ad":"Melisa Ersöz","kullanici":"Hemsireanneblog_1","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle"],"sehir":"Afyonkarahisar","takipci":639,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Yenidoğan hemşiresiyim \nEvliyim ve bir bebeğim var ücretsiz izindeyim bu süre zarfında instagramda içerik üretiyorum","fiyatlar":{"Reels":2500,"Gönderi":1000,"Hikâye":500,"Video":3000}},{"id":"0c565153-a2a0-4903-b63b-6b45160d36fa","ad":"Kader çinar","kullanici":"kaderar24","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Anne & Çocuk"],"sehir":"Muğla","takipci":613,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Ev hanımı ve üç oğlan annesiyim","fiyatlar":{"Reels":1,"Gönderi":1,"Hikâye":1,"Video":1}},{"id":"49b8a68d-57c5-41ed-a969-dd50ecab5675","ad":"Aida Asanbekova","kullanici":"__akparal1evna__","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Yemek & Mutfak","Seyahat","Yaşam & Lifestyle","Eğitim"],"sehir":"Çanakkale","takipci":594,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Kendim Kırgızistanlıyım ve Türkiye’de 1 senedir okuyorum. İnstagramda seyahat ettiğim yerleri paylaşıyorum ve 594 takipçim var","fiyatlar":{"Reels":1,"Gönderi":2,"Hikâye":3,"Video":1}},{"id":"6dd45884-e5ac-47fd-856e-964c9add2982","ad":"akpolat","kullanici":"aslıhan","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Anne & Çocuk","Yaşam & Lifestyle","Seyahat"],"sehir":"Elazığ","takipci":573,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Merhaba,\n\nBen Aslıhan. Avukat olarak mesleki hayatımı günlük rutinlerim, moda, stil ve yaşam tarzı içeriklerimle bir araya getiriyorum. Özellikle günlük hazırlanma vlogları, ofis kombinleri, çanta ve aksesuar seçimleri ile günlük hayatımdan doğal ve samimi kesitler paylaşmayı seviyorum.\n\nMarkaların tarzını ve hikâyesini kendi içerik dünyamla buluşturarak estetik, özgün ve ilgi çekici içerikler üre","fiyatlar":{"Reels":7000,"Gönderi":4000,"Hikâye":3000,"Video":7000}},{"id":"3e982f80-2d5a-4eeb-8124-6a9c7ea74ab2","ad":"Yiğit Efe","kullanici":"Efelerden1yigit","kategoriler":["Anne & Çocuk"],"sehir":"Bursa","takipci":560,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Emine. 2 buçuk yaşındaki Yiğitin hesabını annesi olarak ben yönetiyorum. Hesabımız günlük yaşam, etkinlik ve çocuk afacanlıkları ile günlük hayatımızı paylaştığımız bir hesap.","fiyatlar":{}},{"id":"588dfac5-9b13-43f8-bc60-d833f35ca55f","ad":"Hanife çiftci","kullanici":"Hanifeyylog","kategoriler":["Moda & Güzellik","Yemek & Mutfak","Seyahat","Yaşam & Lifestyle","Fitness & Sağlık","Teknoloji"],"sehir":"Ankara","takipci":507,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"25 yaşında kamu kurumunda çalışıyorum. 4 buçuk aylık evliyim ve profilimden günlük hayatımdan kesitler paylaşmayı çok seviyorum.","fiyatlar":{"Reels":3000,"Gönderi":1000,"Hikâye":500,"Video":5000}},{"id":"c1d7cdc9-3445-4686-acb6-0c445d025ab6","ad":"Merve İnce","kullanici":"merveinc5","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Seyahat"],"sehir":"Sinop","takipci":505,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba,\nBen Merve. Moda, yaşam tarzı, kahve ve güzellik odaklı estetik içerikler üretmek istiyorum. Doğal ışık, minimal konseptler ve kaliteli fotoğraf/video üretimine önem veriyorum. Hesabımda komin paylaşımları, cilt bakım rutinleri, günlük yaşam içeriklerine yer veriyorum. Ürün karşılığı veya farklı iş birliği modelleri kapsamında çalışmak isterim.","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":1000,"Video":999}},{"id":"ae34a66f-af7d-4a74-b3c8-79c49a929914","ad":"Simge özdemir","kullanici":"Simgeasanoglu","kategoriler":["Anne & Çocuk"],"sehir":"İstanbul","takipci":500,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Oğlum için başvuru yapıyorım kendisi çok güler yüzlü ve resim çekilmeye bayılır","fiyatlar":{"Reels":2000,"Gönderi":1000,"Hikâye":1000,"Video":2000}},{"id":"b00c2777-cc73-4754-99a7-cbecc475ea33","ad":"Cilekkizblog","kullanici":"Cilekkizblog","kategoriler":["Moda & Güzellik"],"sehir":"Batman","takipci":490,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Kozmetik ve güzellik hakkında tecrübelerimi dürüstçe açıklayıp içerik üretmeye çalışıyorumm","fiyatlar":{"Reels":1000,"Gönderi":500,"Hikâye":450}},{"id":"55134e83-2845-4e53-b30e-4d1729ee968c","ad":"Berrak Atış","kullanici":"berrakk_atis","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle","Seyahat"],"sehir":"Antalya","takipci":466,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhabaaaa, hem öğrenciyim hem makeup artistim, sosyal medyada renkli makyajlarımı ve içeriklerimi paylaşıyorumm bu yolda büyümeyi hedefledim ve pes etmeyi düşünmüyorumm. Markalarla birlikte iş birliği yaparak hem takipçilerime faydalı içerik üretmeyi hemde daha da büyümeyi hedefliyorummm","fiyatlar":{"Reels":600,"Gönderi":500,"Hikâye":100,"Video":600}},{"id":"5b4c7cbd-74d9-4388-84e9-8981d9edddc4","ad":"Büşra Akgün","kullanici":"chillglamm","kategoriler":["Yemek & Mutfak","Seyahat","Yaşam & Lifestyle"],"sehir":"İzmir","takipci":451,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben @chillglamm hesabının üreticisiyim. Profilimde günlük vloglar, samimi lifestyle kesitleri ve dürüst ürün deneyimlerimi paylaşıyorum.\n​Takipçilerimle kurduğum bu güçlü ve samimi bağı, markanızın ürünleriyle bir araya getirerek doğal, estetik ve yüksek dönüşümlü UGC videoları üretmek istiyorum. Amacım, ürünlerinizi reklam gibi değil, hayatın içinden doğal bir parça olarak izleyiciye sun","fiyatlar":{"Reels":1500,"Gönderi":900,"Hikâye":500,"Video":2000}},{"id":"0a2266f6-973a-4698-9303-e9af1e8f6a6a","ad":"Elçin KILINÇ","kullanici":"elcinkilinc","kategoriler":["Yaşam & Lifestyle","Seyahat","Moda & Güzellik","Yemek & Mutfak"],"sehir":"İzmir","takipci":411,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Herkese merhaba..\nMakyaj ürünleri denemeyi, lifestyle videoları ve mutfakta olmayı seviyorum.","fiyatlar":{"Reels":100,"Gönderi":100,"Hikâye":100,"Video":100}},{"id":"4603c6df-a441-4cf9-97a1-6d886ed7c58a","ad":"Şevval Şimşek","kullanici":"pilateswithsevval","kategoriler":["Fitness & Sağlık"],"sehir":"Kocaeli","takipci":376,"platform":["instagram","youtube","tiktok","twitter"],"dogrulanmis":true,"hakkinda":"Fitness ve pilates eğitmenliği yapıyorum mesleğim sayesinde gelişime açık ve Marka ürünlerini temsil etmek istiyorum","fiyatlar":{}},{"id":"60132c4d-580b-48a5-9776-11f9683db558","ad":"AŞKIN BÜYÜKSALİH","kullanici":"anneradarinda","kategoriler":["Moda & Güzellik","Seyahat","Eğitim","Yaşam & Lifestyle"],"sehir":"Ankara","takipci":326,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba 💗 Ben güzellik, makyaj ve lifestyle alanında içerik üreten bir influencerım. Markanızın ürünlerini ve içerik tarzını çok beğendim. Sizinle ürün tanıtımı, Reels ve Story içerikleri üzerine bir iş birliği yapmak isterim. Uygun olduğunuzda iş birliği koşullarınızı öğrenebilir miyim? Sevgiler. ✨","fiyatlar":{}},{"id":"579cec79-4747-4da1-b066-779c50833005","ad":"Songül tercan","kullanici":"Songul.trcn","kategoriler":["Moda & Güzellik","Fitness & Sağlık","Seyahat","Yaşam & Lifestyle","Yemek & Mutfak"],"sehir":"İstanbul","takipci":273,"platform":["tiktok","instagram"],"dogrulanmis":false,"hakkinda":"Ben Songül günlük yaşam alışveriş bakım güzellik üzerine içerik üretiyorum","fiyatlar":{"Reels":1000,"Gönderi":2000,"Hikâye":2000,"Video":5000}},{"id":"8aec7b41-c57a-4678-9423-8c022d3eb6ee","ad":"Gökhan Savan","kullanici":"mukellefbisofra","kategoriler":["Yemek & Mutfak","Seyahat","Yaşam & Lifestyle"],"sehir":"İzmir","takipci":250,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"43 yaşında chef. Kurumsal geçmiş gastronomi mutfak ve saha deneyimi. Restoran bağlantıları. İzmir Mekan Rehberi adlı instagram sayfası eski Genel Koordinatörü. İzmir’de yaşıyor.","fiyatlar":{"Reels":10000,"Gönderi":5000,"Hikâye":1000}},{"id":"2e129d5e-2335-4b20-a097-b6db942406e0","ad":"Hale can","kullanici":"birtutambenim","kategoriler":["Anne & Çocuk","Yaşam & Lifestyle","Moda & Güzellik","Eğitim"],"sehir":"Manisa","takipci":178,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba 🌸\n\nBen Bir Tutam Benim hesabının içerik üreticisiyim. Instagram hesabımda günlük yaşam, anne-çocuk, kombin önerileri ve ürün deneyimleri üzerine samimi ve özgün içerikler üretiyorum. 🤎\n\nMarkanızın ürünlerini kendi içerik tarzımla buluşturarak takipçilerime doğal, dikkat çekici ve yaratıcı paylaşımlarla tanıtmak isterim.\n\nMarkanızla karşılıklı fayda sağlayabileceğimiz bir iş birliği gerçe","fiyatlar":{}},{"id":"dbd92d0a-3c67-46f0-912f-62d7e98ab444","ad":"Serap aytekin","kullanici":"Pareswonderland","kategoriler":["Yaşam & Lifestyle","Yemek & Mutfak"],"sehir":"Artvin","takipci":105,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Serap. 🌿\nInstagram’da 105 bin kişilik topluluğumla; günlük yaşam, pratik bilgiler, yemek tarifleri, ev yaşamı, doğal yaşam ve hayatı kolaylaştıran öneriler üzerine samimi ve faydalı içerikler üretiyorum.\nTakipçilerimle güvene dayalı, sıcak ve doğal bir iletişim kuruyorum. İşbirliklerinde ürünleri yalnızca tanıtmak yerine, kendi hayatımın içinde deneyimleyerek ve samimi bir şekilde ta","fiyatlar":{"Reels":7500,"Gönderi":5000,"Hikâye":2500,"Video":6000}},{"id":"e6423f87-d4ed-489c-8dca-fb27708763a8","ad":"Sema Sağlam","kullanici":"Semm.akbyk","kategoriler":["Yaşam & Lifestyle"],"sehir":"İstanbul","takipci":73,"platform":["tiktok"],"dogrulanmis":false,"hakkinda":"Bu işi öğrenip gelişem biriyim","fiyatlar":{}},{"id":"92399998-8abf-4d98-8eff-8cbb480e08d5","ad":"Neslişah Diker","kullanici":"nesoli","kategoriler":["Moda & Güzellik","Teknoloji","Yaşam & Lifestyle","Fitness & Sağlık","Eğitim"],"sehir":"Afyonkarahisar","takipci":58,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba! Ben Neslişah. Sosyal medya içerik üreticisi olarak güzellik, bakım, lifestyle ve günlük hayatımdan ilham alan içerikler üretiyorum. İçeriklerimde samimi, doğal ve izleyiciyle kolayca bağ kurabilen bir anlatım kullanmayı seviyorum. Yeni ürün ve uygulamaları kendi deneyimim üzerinden keşfetmeyi ve bunu takipçilerime yaratıcı içeriklerle aktarmayı seviyorum. Dene’yi de deneyimleyerek kendi t","fiyatlar":{"Reels":3000,"Gönderi":2000,"Hikâye":1000,"Video":3000}},{"id":"98148827-69cb-43c8-bacd-c7e0696d7a78","ad":"Dilek Kumcu","kullanici":"İkipetibor_annesi","kategoriler":["Anne & Çocuk"],"sehir":"Muğla","takipci":53,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Uzun süre kurumsal da çalıştıktan sonra istifa ederek evde cocuklarımlar beraber günlük hayatımızdan kesitler oluşturarak içerikler üretiyorum","fiyatlar":{"Reels":5000,"Gönderi":1000,"Hikâye":500}},{"id":"0ac9f0f4-5f7a-4b9f-8c47-65a0e2481320","ad":"Fatma zehra","kullanici":"dailyform.byzehra","kategoriler":["Fitness & Sağlık","Yaşam & Lifestyle"],"sehir":"Tekirdağ","takipci":50,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba ben Zehra. Evli, 2 çocuk annesi ve de hemşireyim. Instagram hesabımda spor, sağlıklı beslenme, fitness ve günlük yaşam üzerine içerikler üretiyorum.","fiyatlar":{"Reels":4000,"Gönderi":3000,"Hikâye":1000,"Video":2000}},{"id":"f0ec3c02-466f-40b8-ac18-1ea3b32c5146","ad":"Yağmur Dilan Aksu","kullanici":"Yağmur","kategoriler":["Moda & Güzellik","Yaşam & Lifestyle"],"sehir":"Çorum","takipci":45,"platform":["instagram","tiktok"],"dogrulanmis":false,"hakkinda":"Merhaba ben Yağmur.\n21 yaşındayım bekarım ve ugc içerik üreticiyim","fiyatlar":{"Reels":900,"Gönderi":500,"Hikâye":350,"Video":1000}},{"id":"3636d930-5fd9-4d85-9018-6625cc80ec71","ad":"Mehtap yakut","kullanici":"mehtapyakutt","kategoriler":["Moda & Güzellik","Eğitim","Yaşam & Lifestyle"],"sehir":"Balıkesir","takipci":36,"platform":["instagram"],"dogrulanmis":true,"hakkinda":"Profesyonel saç tasarımı ve makyaj alanında uzmanlaşmış, bilgi ve deneyimini eğitimlerle aktaran bir güzellik eğitmeni ve içerik üreticisiyim. ✨\n\nUzmanlığımı, yaratıcı bakış açımla birleştirerek saç, makyaj, güzellik ve yaşam tarzı alanlarında özgün, eğitici ve ilham veren içerikler üretiyorum.\n\nMarkalara yalnızca görünürlük değil, profesyonel bilgi, güvenilirlik ve etkili bir tanıtım gücü sunuyor","fiyatlar":{"Reels":15,"Gönderi":10,"Hikâye":3000,"Video":15}},{"id":"9424a1b9-abe0-4e94-aa1d-01fca4160fcd","ad":"Nisa Aras","kullanici":"nisiciko","kategoriler":["Teknoloji","Seyahat","Anne & Çocuk","Otomotiv","Yaşam & Lifestyle","Moda & Güzellik","Fitness & Sağlık","Gaming","Eğitim","Yemek & Mutfak"],"sehir":"Kayseri","takipci":35,"platform":["tiktok","youtube","instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Nisa. Merak etmeyi seven ve öğrendiklerini paylaşmaktan keyif alan bir içerik üreticisiyim. Uluslararası İlişkiler öğrencisi olarak YouTube'da bilgi, kültür ve yaşam tarzı odaklı içerikler üretiyorum. \"Bir Ülke Bir Hafta\" serimle her hafta farklı bir ülkeyi birlikte keşfediyor, vloglarımla ise bu yolculuğun perde arkasını paylaşıyorum. Amacım; samimi, kaliteli ve uzun vadeli içerikler","fiyatlar":{}},{"id":"9a160112-0c80-4620-9823-c255c3dae06d","ad":"Banu satıcı","kullanici":"banuusatici","kategoriler":["Moda & Güzellik","Seyahat","Fitness & Sağlık"],"sehir":"İstanbul","takipci":30,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Merhaba, ben Banu. Instagram’da güzellik, makyaj, cilt bakımı, moda ve yaşam tarzı alanlarında içerik üreten bir içerik üreticisiyim. Estetik, özgün ve doğal içerikler hazırlamayı; deneyimlerimi takipçilerimle samimi bir şekilde paylaşmayı seviyorum. Markaların ruhunu ve ürünlerini kendi tarzımla yansıtarak yaratıcı, güvenilir ve etkili iş birlikleri gerçekleştirmeyi hedefliyorum. Yeni markalar ke","fiyatlar":{"Reels":2500,"Gönderi":1000,"Hikâye":1000,"Video":2500}},{"id":"fbf9e97c-1c1d-4c2a-add6-8b02ceeaa466","ad":"Zahide Şimşek","kullanici":"Birazbenbirazhayat1","kategoriler":["Yaşam & Lifestyle","Seyahat"],"sehir":"İstanbul","takipci":14,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"Instagram içerik üreticisiyim ve 14 bin takipçiye sahip bir hesabım var. Günlük hayatım, gezilerim, kedilerim ve anlık yaşam içerikleri üzerine paylaşımlar yapıyorum. Markalarla uyumlu ve doğal iş birliklerine açığım.","fiyatlar":{"Reels":2000,"Gönderi":1500,"Hikâye":750,"Video":1500}},{"id":"72699306-316b-4468-b3bd-043460323d1a","ad":"Büşra Güzel","kullanici":"guzellbusraa","kategoriler":["Yemek & Mutfak","Yaşam & Lifestyle","Moda & Güzellik","Teknoloji","Eğitim","Fitness & Sağlık","Seyahat"],"sehir":"İstanbul","takipci":13,"platform":["instagram"],"dogrulanmis":false,"hakkinda":"İstanbul’da Anadolu yakasındayaşıyorum, 30 yaşındayım, kurumsal bir şirkette yöneticiyim aynı zamanda sosyal medya uygulaması olan Instagram‘da içerik Üreticliği yaparak sosyal medyanın amacına uygun hizmet edilmesi yönünde insanlara ve yaşam biçimlerinehitap eden içerikler üretmekteyim","fiyatlar":{"Reels":1,"Gönderi":1,"Hikâye":6,"Video":1}},{"id":"266c655e-fc16-4ae2-8135-debb397305c8","ad":"yılmaz","kullanici":"zülfiye","kategoriler":["Moda & Güzellik","Otomotiv"],"sehir":"Aydın","takipci":9,"platform":["instagram","youtube"],"dogrulanmis":true,"hakkinda":"Merhaba! Ben AI UGC içerik üreticisiyim. ✨ Yapay zekâ destekli ürün fotoğrafları, modelli ve modelsiz ürün görselleri, reklam videoları ve yaratıcı dijital içerikler hazırlıyorum. Kozmetik, moda, takı, aksesuar ve farklı sektörlerdeki markalarla iş birliği yapmaya açığım.\n\nMarkaların ürünlerini estetik, özgün ve dikkat çekici içeriklerle tanıtmaya önem veriyorum. Yapay zekâ ve yaratıcı fikirleri b","fiyatlar":{"Reels":750,"Gönderi":500,"Hikâye":500,"Video":1000}},{"id":"eaf2cdfd-1e3e-45b3-9e23-00210e648337","ad":"Aleyna Değişici","kullanici":"aleynakaraduman","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"Aleyna Değişici, 30 Ocak 1998’de Üsküdar da doğdum. Evliyim. İstanbul Aydın Üniversitesi Çocuk Gelişimi bölümünden mezun oldum. Öğretmenim, aynı zamanda çalıştığım kurumlarda sosyal medya uzmanlığı yapmaktayım. Uzun zamandır, bu işi yapmak istiyordum. Başlamak istedim. Şimdiden, çok teşekkür ederim✨","fiyatlar":{"Reels":15,"Gönderi":10,"Hikâye":5,"Video":20}},{"id":"26bd1f49-fc29-4f0f-8d99-69e3d1a1e022","ad":"Oktay Yalın","kullanici":"dearkonoha","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"Merhaba, ben Oktay. 13 yılı aşkın süredir paten sporuyla ilgileniyorum ve aktif olarak hem sürüş hem de gösteri performansları yapıyorum.\n\nİçerik üreticisi olarak Instagram’da paten, spor ve yaşam tarzı odaklı videolar üretiyorum. Amacım hem bu sporu daha geniş kitlelere tanıtmak hem de kaliteli ve motive edici içerikler üretmek.\n\nYüksek deneyimim sayesinde özellikle paten teknikleri, başlangıç eğ","fiyatlar":{}},{"id":"4bbac0f7-cf4f-493c-a321-823f375d7854","ad":"Yasemin Kabaoğlu","kullanici":"yaseminlikk","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"34 yaşında bir çocuk annesi bir psikoloğum. Çocuk gelişimi, moda ve kahve içeren ve gözüme hoş gelen hayatın içinden içerikler paylaşıyorum.","fiyatlar":{"Reels":4000,"Gönderi":3000,"Hikâye":2000,"Video":4000}},{"id":"0ce68346-98be-4535-9197-c5487eb5cd8f","ad":"Zöhre Aybakan","kullanici":"Zohre_aybakan","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"Kentten sıkılmış ruhu kırsalda gezinen biri","fiyatlar":{"Reels":10000,"Gönderi":5000,"Hikâye":2000,"Video":10000}},{"id":"c2513d02-a18f-40e7-a20c-9af5f1ffa5d7","ad":"Abdullah kara","kullanici":"Abdullah7927","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"Merhaba ben Abdullah benim friendline diye bir sosyal medyam var 100k takipçi 400 k beğeni var işbirliğe aktifim","fiyatlar":{"Reels":750,"Gönderi":2000,"Hikâye":1000,"Video":3000}},{"id":"faf6bc8f-7cab-464d-a577-91650f4b7f3f","ad":"Banu güler","kullanici":"banu_estetik34","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"42 yaşında berlin doğumlu 11 yıldır türkiyede yaşıyorum cilgin deli dolu güleç biriyim hayat boyunca güzellikle uğraştım estetik hastanesinde ağenta olarak katkım var","fiyatlar":{"Reels":2500,"Gönderi":1500,"Hikâye":750,"Video":2500}},{"id":"abfe625e-350c-4877-a045-c7aee88c14f2","ad":"Elif Binal","kullanici":"elifcepasta","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"30 yaşında iki üniversite bitirmiş ev hanımıyım. Evli ve iki çocuk annesiyim. Sayfamda evimden sunumlar paylaşıyorum ayrıca evde pasta kurabiye yapıp satıyorum","fiyatlar":{}},{"id":"11496dc4-2083-4019-b877-8988b4a22bd4","ad":"Güliş Uçkaç","kullanici":"gulisuckac","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"Merhaba,\n\nBen Güliş. Güzellik, kişisel bakım, saç bakımı, parfüm, moda ve lifestyle alanlarına ilgi duyuyorum. Estetik, sade ve özenli içerikler üretmeyi seviyorum.\n\nMarkalarla içerik üretimi ve iş birliği alanında ilk kez adım atıyorum. Bu süreçte kendimi geliştirmeyi, yaratıcı fikirler üretmeyi ve birlikte güzel işlere imza atmayı hedefliyorum.\n\nMarkanızın ürünlerini kendi tarzımla yansıtabilece","fiyatlar":{}},{"id":"244bd6f3-538b-4d57-b14d-b34318281115","ad":"Eda curoğlu","kullanici":"edamalkocuroglu","kategoriler":[],"sehir":"","takipci":0,"platform":[],"dogrulanmis":false,"hakkinda":"Şehirde tanınan sosyal ve iş çevresi geniş biriyim kendime ait mimari dekorasyon firmam var.\nEşim siyasetçi bu sebeple tanınırlığımız ve sosyal medya görüntülemelerim oldukça yüksek","fiyatlar":{"Reels":1000,"Gönderi":1000,"Hikâye":200,"Video":1000}}],"fiyatRehberi":{"kaynak":"https://isbirligim.com.tr","cekilme":"2026-11-02","tarih":"2026-11-02","takipciyeGore":[{"ad":"10 binin altı (nano/mikro)","adet":243,"reels":1000,"gonderi":1000,"hikaye":500},{"ad":"10–50 bin (mikro)","adet":113,"reels":2500,"gonderi":2000,"hikaye":1000},{"ad":"50–100 bin (orta)","adet":30,"reels":5000,"gonderi":2000,"hikaye":2000},{"ad":"100 bin ve üzeri","adet":31,"reels":5000,"gonderi":5000,"hikaye":2000}],"kategoriyeGore":[{"ad":"Yaşam & Lifestyle","adet":265,"reels":2000,"gonderi":1000,"hikaye":750},{"ad":"Moda & Güzellik","adet":250,"reels":2000,"gonderi":1000,"hikaye":750},{"ad":"Yemek & Mutfak","adet":180,"reels":2000,"gonderi":1000,"hikaye":700},{"ad":"Seyahat","adet":145,"reels":2000,"gonderi":1000,"hikaye":750},{"ad":"Anne & Çocuk","adet":134,"reels":2000,"gonderi":1000,"hikaye":500},{"ad":"Fitness & Sağlık","adet":93,"reels":2000,"gonderi":1500,"hikaye":1000},{"ad":"Eğitim","adet":80,"reels":1750,"gonderi":1000,"hikaye":600},{"ad":"Teknoloji","adet":78,"reels":2000,"gonderi":1000,"hikaye":500},{"ad":"Otomotiv","adet":26,"reels":2250,"gonderi":1500,"hikaye":500},{"ad":"Gaming","adet":25,"reels":1000,"gonderi":625,"hikaye":500}]},"kampanyalar":[{"id":"b3e5179a-5832-4dd5-9078-f8ef94f4c3a7","baslik":"Kahve Yanında Geleneksel Lezzet Lokum — Ertokuş Efendi’yle Tadını Paylaş","marka":"Ertokuş Efendi","aciklama":"Bu kampanya, Ertokuş Efendi’nin kahve ve lokum ürünlerini yalnızca tanıtmak yerine, onları günlük hayatın keyifli ve paylaşılabilir anlarına yerleştirmeyi amaçlar. Ana iletişim fikri, ürünün “kahve yanında ikram” olmanın ötesinde; misafirlik, hediyeleşme, bayram, ofis molası ve kendine küçük bir ödül verme anlarında kullanılabilen geleneksel bir lezzet olduğudur."}],"cekilme":"2026-11-02"};
+// Influencer reklam metni uyum kontrolü (deterministik, LLM'siz).
+// Dayanak: Ticari Reklam ve Haksız Ticari Uygulamalar Yönetmeliği md. 23/A
+// (RG 01.07.2026 / 33297, yürürlük 01.08.2026) ve Ticaret Bakanlığı
+// "Sosyal Medya Etkileyicileri Tarafından Yapılan Ticari Reklam" kılavuzu.
+// Bu kontrol bir ön elemedir; hukuki görüş yerine geçmez.
+
+const kucuk = (s) => String(s ?? "").toLocaleLowerCase("tr-TR");
+const katla = (s) => s.replace(/[çğıöşüâî]/g, (c) => ({ ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u", â: "a", î: "i" })[c]);
+
+const SAGLIK_KALIPLARI = [
+  /tedavi (eder|ediyor|etti)/, /iyileştir/, /şifa/, /zayıflat/, /kilo verdir/, /kilo kaybettir/,
+  /yağ yak/, /selülit(i)? (yok|bitir)/, /hastalığ?[ıa] (karşı|iyi)/, /kanser/, /diyabet/, /tansiyon/,
+  /bağışıklığ?[ıi] (güçlendir|artır)/, /detoks/, /ilaç gibi/, /ağrıyı? (geçir|keser|bitir)/,
+  /mucize/, /\bkesin sonuç/, /garantili sonuç/, /yan etkisi? (yok|olmayan)/,
+];
+const USTUNLUK_KALIPLARI = [/\ben iyi(si)?\b/, /\ben ucuz(u)?\b/, /1 numara/, /bir numara/, /rakipsiz/, /piyasadaki tek/, /\ben kaliteli/];
+const COCUK_CAGRI = [/annene (söyle|aldır)/, /babana (söyle|aldır)/, /ailene aldır/, /hemen (al|satın al)/, /kaçırma/];
+const YZ_ANMA = /(yapay zek[aâ]|\bai\b|\byz\b)/;
+const YZ_BEYAN = /(yapay zek[aâ] (ile|kullanılarak) (üretil|oluşturul|düzenlen)|#yapayzeka|#yz\b|#aigenerated)/;
+const ZAYIF_ETIKET = /(#?i[sş] ?birli[gğ]i|#?sponsorlu|#ad\b|#?gifted|#?hediye)/;
+const GUCLU_ETIKET = /(#reklam\b|#tan[ıi]t[ıi]m\b|\breklam\b|\btan[ıi]t[ıi]m\b)/;
+const INDIRIM = /(%\s?\d+|\d+\s?%)\s*(indirim|i̇ndirim)|indirim kodu/;
+
+/**
+ * @param {{metin:string, kategori?:string, reklam_veren?:string}} girdi
+ * @returns {{sonuc:"uygun"|"duzeltilmeli"|"riskli", puan:number, bulgular:Array<{seviye:"hata"|"uyari"|"bilgi", kural:string, aciklama:string, oneri:string}>, not:string}}
+ */
+function uyumKontrol(girdi) {
+  const metin = String(girdi?.metin ?? "");
+  const m = kucuk(metin);
+  const kategori = kucuk(girdi?.kategori);
+  const bulgular = [];
+  const ekle = (seviye, kural, aciklama, oneri) => bulgular.push({ seviye, kural, aciklama, oneri });
+
+  if (!metin.trim()) {
+    return { sonuc: "duzeltilmeli", puan: 0, bulgular: [{ seviye: "hata", kural: "bos_metin", aciklama: "Kontrol edilecek metin boş.", oneri: "Paylaşım metnini (caption) girin." }], not: NOT };
+  }
+
+  // 1) Reklam ibaresi
+  const guclu = m.match(GUCLU_ETIKET);
+  if (!guclu) {
+    if (ZAYIF_ETIKET.test(m)) {
+      ekle("uyari", "reklam_ibaresi", "Yalnızca \"iş birliği/sponsorlu\" gibi bir ibare var. 1 Ağustos 2026 düzenlemesiyle \"Reklam\" veya \"Tanıtım\" ibaresi açıkça aranıyor.",
+        "Metnin başına \"Reklam\" veya \"#reklam\" ekleyin.");
+    } else {
+      ekle("hata", "reklam_ibaresi", "Ücretli/karşılıklı paylaşımda reklam olduğunu belirten ibare yok.",
+        "Metnin ilk satırına \"Reklam | @marka\" veya \"#reklam\" ekleyin.");
+    }
+  } else if (guclu.index > 125) {
+    ekle("uyari", "reklam_ibaresi_konumu", "Reklam ibaresi metnin sonlarında; \"devamını gör\" altında kalabilir.",
+      "İbareyi ilk satıra, kesilmeden görünecek yere taşıyın.");
+  }
+
+  // 2) Reklam verenin adı
+  const rv = kucuk(girdi?.reklam_veren).trim();
+  if (rv) {
+    const sade = katla(rv).replace(/[^a-z0-9]/g, "");
+    if (!katla(m).replace(/[^a-z0-9]/g, "").includes(sade)) {
+      ekle("uyari", "reklam_veren", `Reklam verenin adı (${girdi.reklam_veren}) metinde geçmiyor.`,
+        `\"Reklam | @${sade}\" biçiminde reklam vereni etiketleyin.`);
+    }
+  }
+
+  // 3) Sağlık beyanı
+  const saglik = SAGLIK_KALIPLARI.filter((r) => r.test(m)).map((r) => m.match(r)[0]);
+  if (saglik.length) {
+    const fitness = /fitness|sağlık|güzellik|anne/.test(kategori);
+    ekle(fitness ? "hata" : "uyari", "saglik_beyani",
+      `Sağlık beyanı sayılabilecek ifade(ler): ${[...new Set(saglik)].join(", ")}. Influencer'ların mevzuata aykırı sağlık beyanı yapması yasak.`,
+      "Tedavi/iyileştirme/zayıflatma vaadi yerine kişisel deneyim ve ürünün onaylı özelliklerini anlatın (\"bana iyi geldi\" değil, \"rutinimde kullanıyorum\").");
+  }
+
+  // 4) Üstünlük / karşılaştırma iddiası
+  const ust = USTUNLUK_KALIPLARI.filter((r) => r.test(m)).map((r) => m.match(r)[0]);
+  if (ust.length) {
+    ekle("uyari", "ustunluk_iddiasi", `Kanıtlanması gereken üstünlük iddiası: ${[...new Set(ust)].join(", ")}.`,
+      "Belgelenemiyorsa \"en çok sevdiğim\", \"benim favorim\" gibi öznel ifade kullanın.");
+  }
+
+  // 5) Yapay zekâ
+  if (YZ_ANMA.test(m) && !YZ_BEYAN.test(m)) {
+    ekle("bilgi", "yapay_zeka", "Metin yapay zekâdan söz ediyor. Görsel/ses/metin yapay zekâyla üretildiyse bu açıkça belirtilmeli.",
+      "Gerekiyorsa \"Bu görsel yapay zekâ ile oluşturulmuştur.\" ekleyin.");
+  }
+
+  // 6) Çocuklar
+  const cocukBaglam = /anne|çocuk/.test(kategori) || /çocuk|bebek|minik|okul/.test(m);
+  if (cocukBaglam) {
+    const cagri = COCUK_CAGRI.filter((r) => r.test(m)).map((r) => m.match(r)[0]);
+    if (cagri.length) {
+      ekle("hata", "cocuk_dogrudan_cagri", `Çocuklara doğrudan satın alma çağrısı gibi okunabilecek ifade: ${[...new Set(cagri)].join(", ")}.`,
+        "Çağrıyı ebeveyne yönelik ve bilgilendirici yapın; çocukları ebeveynlerini ikna etmeye yönlendirmeyin.");
+    } else {
+      ekle("bilgi", "cocuk_hassasiyet", "Çocukların yer aldığı/hedeflendiği içerik: kişisel veriyle çocuklara hedefli reklam yasak ve çocukların deneyimsizliği istismar edilmemeli.",
+        "Çocuğun yüzünü/bilgisini paylaşmadan önce veli rızasını ve KVKK'yı gözetin.");
+    }
+  }
+
+  // 7) İndirim
+  if (INDIRIM.test(m) && !/(geçerli|son gün|tarih|kadar)/.test(m)) {
+    ekle("bilgi", "indirim_kosullari", "İndirim/kod var ama süre veya koşul belirtilmemiş.",
+      "\"…tarihine kadar geçerli\" gibi süre ve koşulu ekleyin.");
+  }
+
+  const hata = bulgular.filter((b) => b.seviye === "hata").length;
+  const uyari = bulgular.filter((b) => b.seviye === "uyari").length;
+  const puan = Math.max(0, 100 - hata * 35 - uyari * 12 - (bulgular.length - hata - uyari) * 3);
+  const sonuc = hata ? "riskli" : uyari ? "duzeltilmeli" : "uygun";
+  return { sonuc, puan, bulgular, not: NOT };
+}
+
+const NOT = "Otomatik ön kontroldür, hukuki görüş değildir. Güncel metin: Ticari Reklam ve Haksız Ticari Uygulamalar Yönetmeliği md. 23/A (RG 33297).";
+
+// Asistanın kullandığı araçlar. Saf fonksiyonlar: veri parametreyle gelir,
+// hem Node sunucusunda hem tarayıcıda (demo) aynen çalışır.
+
+
+const SITE = "https://isbirligim.com.tr";
+const ICERIK_TURLERI = ["Reels", "Gönderi", "Hikâye", "Video"];
+// Sitede bazı profiller "1 ₺", "3 ₺" gibi (muhtemelen "bin ₺" kastıyla) fiyat girmiş.
+// Bunlar hesaplamaları bozmasın diye bu eşiğin altı geçersiz sayılır.
+const MIN_GECERLI_FIYAT = 100;
+const gf = (inf) => Object.fromEntries(Object.entries(inf.fiyatlar ?? {}).filter(([, v]) => v >= MIN_GECERLI_FIYAT));
+const supheli = (inf) => Object.entries(inf.fiyatlar ?? {}).filter(([, v]) => v < MIN_GECERLI_FIYAT).map(([k]) => k);
+
+const sade = (s) => String(s ?? "").toLocaleLowerCase("tr-TR")
+  .replace(/[çğıöşüâî]/g, (c) => ({ ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u", â: "a", î: "i" })[c])
+  .replace(/&/g, " ").replace(/\s+/g, " ").trim();
+const icerikTuru = (t) => {
+  const s = sade(t);
+  if (!s) return null;
+  if (s.startsWith("reel")) return "Reels";
+  if (s.startsWith("gon") || s.startsWith("post")) return "Gönderi";
+  if (s.startsWith("hik") || s.startsWith("story")) return "Hikâye";
+  if (s.startsWith("vid") || s.startsWith("youtube")) return "Video";
+  return null;
+};
+const kategoriEsles = (aranan, kategoriler) => {
+  const a = sade(aranan);
+  if (!a) return true;
+  return kategoriler.some((k) => sade(k).includes(a) || a.includes(sade(k).split(" ")[0]));
+};
+const yuzdelik = (dizi, p) => {
+  if (!dizi.length) return null;
+  const s = [...dizi].sort((x, y) => x - y);
+  const i = (s.length - 1) * p, a = Math.floor(i), b = Math.ceil(i);
+  return Math.round(s[a] + (s[b] - s[a]) * (i - a));
+};
+const kademe = (takipci) => takipci < 10_000 ? 0 : takipci < 50_000 ? 1 : takipci < 100_000 ? 2 : 3;
+const KADEME_ADI = ["10 binin altı (nano/mikro)", "10–50 bin (mikro)", "50–100 bin (orta)", "100 bin ve üzeri"];
+const rehberAlani = { Reels: "reels", "Gönderi": "gonderi", "Hikâye": "hikaye" };
+const kisa = (inf) => ({
+  id: inf.id, ad: inf.ad, kullanici: inf.kullanici, kategoriler: inf.kategoriler, sehir: inf.sehir || null,
+  takipci: inf.takipci, platform: inf.platform, dogrulanmis: inf.dogrulanmis, fiyatlar: gf(inf),
+  ...(supheli(inf).length ? { gecersiz_fiyat: supheli(inf) } : {}),
+  profil_url: `${SITE}/influencer/${inf.id}`,
+});
+
+/** Filtrele + puanla. Puan: kategori odağı, şehir, doğrulama, fiyat bilgisi, bütçeye uygunluk, anahtar kelime. */
+function influencerAra(veri, g = {}) {
+  const tur = icerikTuru(g.icerik_turu);
+  const limit = Math.min(Math.max(Number(g.limit) || 8, 1), 20);
+  const maxFiyat = Number(g.max_fiyat) || null;
+  const kelimeler = sade(g.anahtar_kelime).split(" ").filter((k) => k.length > 2);
+  const adaylar = veri.influencerlar.filter((inf) => {
+    if (g.kategori && !kategoriEsles(g.kategori, inf.kategoriler)) return false;
+    if (g.sehir && sade(inf.sehir) !== sade(g.sehir)) return false;
+    if (g.min_takipci && inf.takipci < Number(g.min_takipci)) return false;
+    if (g.max_takipci && inf.takipci > Number(g.max_takipci)) return false;
+    if (g.platform && !inf.platform.some((p) => sade(p) === sade(g.platform))) return false;
+    if (g.sadece_dogrulanmis && !inf.dogrulanmis) return false;
+    if (maxFiyat && tur && !(gf(inf)[tur] <= maxFiyat)) return false;
+    return true;
+  });
+  const sonuclar = adaylar.map((inf) => {
+    let puan = 0; const neden = [];
+    if (g.kategori) {
+      const odak = 1 / Math.max(inf.kategoriler.length, 1);
+      puan += 20 + 20 * odak;
+      if (inf.kategoriler.length <= 2) neden.push("kategoriye odaklı");
+    }
+    if (g.sehir) { puan += 15; neden.push(`${inf.sehir}'da`); }
+    if (inf.dogrulanmis) { puan += 15; neden.push("doğrulanmış hesap"); }
+    if (Object.keys(gf(inf)).length) puan += 10; else neden.push("geçerli fiyat girmemiş");
+    if (tur && gf(inf)[tur]) {
+      const tlBin = gf(inf)[tur] / Math.max(inf.takipci / 1000, 1);
+      puan += Math.max(0, 15 - tlBin); // 1000 takipçi başına ucuz olana artı
+    }
+    if (kelimeler.length) {
+      const h = sade(inf.hakkinda + " " + inf.ad + " " + inf.kullanici);
+      const isabet = kelimeler.filter((k) => h.includes(k)).length;
+      if (isabet) { puan += 10 * isabet; neden.push("profil açıklaması eşleşiyor"); }
+    }
+    puan += Math.min(10, Math.log10(Math.max(inf.takipci, 1)) * 2);
+    return { ...kisa(inf), uygunluk_puani: Math.round(puan), neden };
+  });
+  const sirala = g.sirala === "takipci" ? (a, b) => b.takipci - a.takipci
+    : g.sirala === "fiyat" && tur ? (a, b) => (a.fiyatlar[tur] ?? 1e12) - (b.fiyatlar[tur] ?? 1e12)
+    : (a, b) => b.uygunluk_puani - a.uygunluk_puani || b.takipci - a.takipci;
+  sonuclar.sort(sirala);
+  return { toplam_eslesen: sonuclar.length, gosterilen: Math.min(limit, sonuclar.length), sonuclar: sonuclar.slice(0, limit),
+    not: "Takipçi sayıları influencer beyanıdır; 'doğrulanmış' olanlar platformca kontrol edilmiştir. Fiyatlar liste fiyatıdır, pazarlığa açıktır." };
+}
+
+/** Bir takipçi/kategori/içerik türü için fiyat bandı: site rehberi + benzer profillerin dağılımı. */
+function fiyatAnalizi(veri, g = {}) {
+  const takipci = Number(g.takipci) || 0;
+  const turler = icerikTuru(g.icerik_turu) ? [icerikTuru(g.icerik_turu)] : ICERIK_TURLERI;
+  const k = kademe(takipci);
+  const kademeSatir = veri.fiyatRehberi.takipciyeGore[k] ?? null;
+  const katSatir = g.kategori ? veri.fiyatRehberi.kategoriyeGore.find((r) => kategoriEsles(g.kategori, [r.ad])) ?? null : null;
+  const benzer = veri.influencerlar.filter((i) => kademe(i.takipci) === k && (!g.kategori || kategoriEsles(g.kategori, i.kategoriler)));
+  const sonuc = {};
+  for (const t of turler) {
+    const fiyatlar = benzer.map((i) => gf(i)[t]).filter(Boolean);
+    const p25 = yuzdelik(fiyatlar, 0.25), p50 = yuzdelik(fiyatlar, 0.5), p75 = yuzdelik(fiyatlar, 0.75);
+    const rehber = [kademeSatir?.[rehberAlani[t]], katSatir?.[rehberAlani[t]]].filter(Boolean);
+    const rehberOrt = rehber.length ? Math.round(rehber.reduce((a, b) => a + b, 0) / rehber.length) : null;
+    const merkez = p50 && rehberOrt ? Math.round((p50 + rehberOrt) / 2) : p50 ?? rehberOrt;
+    const yuvarla = (x) => (x == null ? null : Math.round(x / 250) * 250);
+    sonuc[t] = {
+      onerilen_alt: merkez == null ? null : yuvarla(Math.min(p25 ?? merkez * 0.75, merkez * 0.85)),
+      onerilen: yuvarla(merkez),
+      onerilen_ust: merkez == null ? null : yuvarla(Math.max(p75 ?? merkez * 1.3, merkez * 1.2)),
+      benzer_profil_sayisi: fiyatlar.length,
+      benzer_ortanca: p50, rehber_kademe_ortancasi: kademeSatir?.[rehberAlani[t]] ?? null,
+      rehber_kategori_ortancasi: katSatir?.[rehberAlani[t]] ?? null,
+      bin_takipci_basina_tl: merkez && takipci ? Math.round((merkez / (takipci / 1000)) * 10) / 10 : null,
+    };
+  }
+  return { takipci_kademesi: KADEME_ADI[k], kategori: katSatir?.ad ?? g.kategori ?? null, icerik: sonuc,
+    rehber_tarihi: veri.fiyatRehberi.tarih,
+    not: "Rehber, influencer'ların kendi girdiği fiyatların ortancasıdır; gerçekleşen işlem fiyatı değildir. Video için site rehberinde satır yok, yalnız benzer profiller kullanıldı." };
+}
+
+/** Bütçeye göre influencer karması (açgözlü: TL başına erişimi en yüksek olandan başlar, çeşitliliği korur). */
+function butcePlani(veri, g = {}) {
+  const butce = Number(g.butce_tl) || 0;
+  const tur = icerikTuru(g.icerik_turu) ?? "Reels";
+  if (butce <= 0) throw new Error("butce_tl pozitif bir sayı olmalı");
+  const fiyat = (i) => gf(i)[tur];
+  const adaylar = veri.influencerlar.filter((i) => fiyat(i) > 0 && i.takipci > 0
+    && (!g.kategori || kategoriEsles(g.kategori, i.kategoriler))
+    && (!g.sehir || sade(i.sehir) === sade(g.sehir))
+    && (!g.sadece_dogrulanmis || i.dogrulanmis)
+    && (!g.min_takipci || i.takipci >= Number(g.min_takipci)));
+  const maxKisi = Math.min(Number(g.max_kisi) || 10, 25);
+  const hedef = g.hedef === "cesitlilik" ? "cesitlilik" : "erisim";
+  const deger = (i) => hedef === "erisim" ? i.takipci / fiyat(i) : (1 / fiyat(i)) * (i.dogrulanmis ? 1.5 : 1);
+  const sirali = [...adaylar].sort((a, b) => deger(b) - deger(a));
+  const secilen = []; let kalan = butce;
+  for (const i of sirali) {
+    if (secilen.length >= maxKisi) break;
+    if (fiyat(i) <= kalan) { secilen.push(i); kalan -= fiyat(i); }
+  }
+  const toplamTakipci = secilen.reduce((a, i) => a + i.takipci, 0);
+  return {
+    icerik_turu: tur, butce_tl: butce, harcanan_tl: butce - kalan, kalan_tl: kalan, aday_sayisi: adaylar.length,
+    toplam_takipci: toplamTakipci,
+    bin_takipci_basina_tl: toplamTakipci ? Math.round(((butce - kalan) / (toplamTakipci / 1000)) * 10) / 10 : null,
+    secilenler: secilen.map((i) => ({ ...kisa(i), fiyat: fiyat(i) })),
+    not: "Toplam takipçi = toplam erişim değildir (kitle örtüşmesi, etkileşim oranı). Liste fiyatlarıyla hesaplandı; paket/pazarlıkla düşebilir.",
+  };
+}
+
+/** Bir influencer profilini değerlendirir: eksikler, fiyat konumu, rekabet. */
+function profilAnalizi(veri, g = {}) {
+  const ara = sade(g.kullanici ?? g.id ?? g.ad).replace(/^@/, "");
+  if (!ara) throw new Error("kullanici, id veya ad verin");
+  const inf = veri.influencerlar.find((i) => i.id === g.id || sade(i.kullanici) === ara)
+    ?? veri.influencerlar.find((i) => sade(i.ad) === ara || sade(i.kullanici).includes(ara) || sade(i.ad).includes(ara));
+  if (!inf) throw new Error(`'${g.kullanici ?? g.id ?? g.ad}' bulunamadı. Profil sitede dolu değilse listede yer almaz.`);
+  const eksikler = [];
+  const sup = supheli(inf);
+  if (sup.length) eksikler.push(`${sup.join(", ")} fiyatı ${MIN_GECERLI_FIYAT} ₺'nin altında (${sup.map((k) => inf.fiyatlar[k] + " ₺").join(", ")}): büyük olasılıkla hatalı girildi; markalar ciddiye almaz, düzeltin.`);
+  if (!Object.keys(inf.fiyatlar).length) eksikler.push("Fiyat girilmemiş: markalar bütçe filtresinde bu profili göremez.");
+  else for (const t of ICERIK_TURLERI) if (!inf.fiyatlar[t]) eksikler.push(`${t} fiyatı yok.`);
+  if (!inf.sehir) eksikler.push("Şehir yok: yerel kampanya aramalarında çıkmaz.");
+  if ((inf.hakkinda ?? "").length < 60) eksikler.push("'Hakkında' çok kısa: kitle, içerik tarzı ve önceki iş birliklerini yazın.");
+  if (!inf.dogrulanmis) eksikler.push("Hesap doğrulanmamış: doğrulama, aramada öne çıkarır ve güven verir.");
+  if (inf.kategoriler.length > 4) eksikler.push(`${inf.kategoriler.length} kategori seçilmiş: 2-3 ana kategoriye inmek uzmanlık algısını artırır.`);
+  if (inf.platform.length < 2) eksikler.push("Tek platform: TikTok/YouTube varsa ekleyin (paket teklif fırsatı).");
+  const fa = fiyatAnalizi(veri, { takipci: inf.takipci, kategori: inf.kategoriler[0] });
+  const konum = {};
+  for (const [t, f] of Object.entries(gf(inf))) {
+    const b = fa.icerik[t];
+    if (!b?.onerilen) continue;
+    konum[t] = { fiyatin: f, piyasa_bandi: [b.onerilen_alt, b.onerilen_ust],
+      durum: f < b.onerilen_alt ? "piyasanın altında" : f > b.onerilen_ust ? "piyasanın üstünde" : "piyasa bandında" };
+  }
+  const rakip = veri.influencerlar.filter((i) => i.id !== inf.id && kademe(i.takipci) === kademe(inf.takipci)
+    && i.kategoriler.some((k) => inf.kategoriler.includes(k))).length;
+  return { profil: { ...kisa(inf), hakkinda: inf.hakkinda }, eksikler, fiyat_konumu: konum, takipci_kademesi: fa.takipci_kademesi,
+    ayni_kademe_ve_kategoride_rakip: rakip };
+}
+
+function kampanyaListesi(veri, g = {}) {
+  const k = veri.kampanyalar.filter((c) => !g.kategori || sade(c.aciklama + c.baslik).includes(sade(g.kategori)));
+  return { aktif_kampanya: k.length, kampanyalar: k.map((c) => ({ ...c, url: `${SITE}/kampanya/${c.id}` })) };
+}
+
+// ---- Araç tanımları (Claude tool şeması) ----
+const S = (properties, required = []) => ({ type: "object", properties, required, additionalProperties: false });
+const str = (description, extra = {}) => ({ type: "string", description, ...extra });
+const num = (description) => ({ type: "number", description });
+const TUR = str("İçerik türü", { enum: ICERIK_TURLERI });
+
+const ARACLAR = [
+  { name: "influencer_ara", roller: ["marka"], calistir: influencerAra,
+    description: "isbirligim.com.tr'deki profili dolu influencer'ları filtreler ve uygunluğa göre sıralar. Ad, kullanıcı adı, kategori, şehir, takipçi, doğrulama, fiyatlar ve profil linkini döndürür. Influencer önerirken HER ZAMAN bunu kullan; isim uydurma.",
+    input_schema: S({ kategori: str("Örn. 'Yemek & Mutfak', 'Anne & Çocuk', 'Fitness'"), sehir: str("Örn. 'İstanbul'"),
+      min_takipci: num("En az takipçi"), max_takipci: num("En çok takipçi"), icerik_turu: TUR, max_fiyat: num("Seçilen içerik türü için en yüksek fiyat (TL)"),
+      platform: str("instagram, tiktok, youtube"), sadece_dogrulanmis: { type: "boolean" }, anahtar_kelime: str("Profil açıklamasında aranacak kelimeler"),
+      sirala: str("Sıralama", { enum: ["uygunluk", "takipci", "fiyat"] }), limit: num("1-20, varsayılan 8") }) },
+  { name: "butce_plani", roller: ["marka"], calistir: butcePlani,
+    description: "Verilen bütçeyle hangi influencer'larla çalışılabileceğini hesaplar (liste fiyatlarıyla). Seçilenleri, harcanan/kalan tutarı ve toplam takipçiyi döndürür.",
+    input_schema: S({ butce_tl: num("Toplam bütçe (TL)"), icerik_turu: TUR, kategori: str("Kategori"), sehir: str("Şehir"),
+      hedef: str("erisim: TL başına en çok takipçi; cesitlilik: daha çok sayıda küçük hesap", { enum: ["erisim", "cesitlilik"] }),
+      sadece_dogrulanmis: { type: "boolean" }, min_takipci: num("En az takipçi"), max_kisi: num("En çok kaç influencer (varsayılan 10)") }, ["butce_tl"]) },
+  { name: "fiyat_analizi", roller: ["marka", "influencer"], calistir: fiyatAnalizi,
+    description: "Takipçi sayısı ve kategoriye göre içerik türü başına önerilen fiyat bandını (alt/önerilen/üst TL) site fiyat rehberi ve benzer profillerden hesaplar.",
+    input_schema: S({ takipci: num("Takipçi sayısı"), kategori: str("Kategori"), icerik_turu: TUR }, ["takipci"]) },
+  { name: "profil_analizi", roller: ["influencer", "marka"], calistir: profilAnalizi,
+    description: "Sitedeki bir influencer profilini kullanıcı adı/ad ile bulur; eksiklerini, fiyatlarının piyasaya göre konumunu ve rakip sayısını döndürür.",
+    input_schema: S({ kullanici: str("Instagram kullanıcı adı (@ olmadan) veya profil adı"), id: str("Profil id (varsa)") }) },
+  { name: "kampanya_listesi", roller: ["influencer", "marka"], calistir: kampanyaListesi,
+    description: "Sitedeki aktif kampanyaları (başlık, marka, açıklama, link) listeler.",
+    input_schema: S({ kategori: str("İsteğe bağlı kategori filtresi") }) },
+  { name: "uyum_kontrol", roller: ["marka", "influencer"], calistir: (_veri, g) => uyumKontrol(g),
+    description: "Bir paylaşım metnini/brief'i Türkiye influencer reklam kurallarına (Reklam/Tanıtım ibaresi, sağlık beyanı, üstünlük iddiası, çocuk, yapay zekâ, indirim) göre denetler. Yazdığın HER caption/örnek paylaşım metnini son haline getirmeden önce bununla kontrol et.",
+    input_schema: S({ metin: str("Kontrol edilecek metin"), kategori: str("Kategori"), reklam_veren: str("Marka adı") }, ["metin"]) },
+];
+
+const rolAraclari = (rol) => ARACLAR.filter((a) => a.roller.includes(rol));
+
+/** Aracı çalıştırır; hata olursa {hata} döndürür (modele geri iletilir). */
+function aracCalistir(veri, ad, girdi) {
+  const a = ARACLAR.find((x) => x.name === ad);
+  if (!a) return { hata: `Bilinmeyen araç: ${ad}` };
+  try { return a.calistir(veri, girdi && typeof girdi === "object" ? girdi : {}); }
+  catch (e) { return { hata: String(e?.message ?? e) }; }
+}
+
+// İki rol için sistem talimatları. Sabit metinler: önbelleğe alınabilmesi
+// için içine tarih/saat gibi değişken bilgi koymayın.
+
+const ORTAK = `Sen isbirligim.com.tr'nin yapay zekâ asistanısın. isbirligim.com.tr, markaları mikro influencer'larla buluşturan Türkçe bir platformdur.
+
+Platform nasıl çalışır (kullanıcıya bu çerçevede yol göster):
+- Markalar kampanya açar ya da beğendiği influencer'a doğrudan teklif gönderir.
+- Influencer bir anlaşma kartı gönderir: ücret, teslimatlar (Reels/Gönderi/Hikâye/Video), teslim tarihi, dahil revizyon sayısı, ödeme yöntemi.
+- Kart onaylanınca iletişim bilgileri paylaşılır; ödeme ve fatura taraflar arasında yapılır. Platform ücret veya komisyon almaz.
+- Profillerde takipçi sayısı influencer beyanıdır; "doğrulanmış" rozeti platformun sahiplik ve takipçi kontrolü yaptığını gösterir.
+
+Çalışma kuralların:
+- Her zaman Türkçe, samimi ama profesyonel yaz. Kısa paragraflar ve maddeler kullan. Para birimini "5.000 ₺" biçiminde yaz.
+- Influencer adı, takipçi, fiyat, kampanya gibi platform verisini ASLA uydurma: araçlarla getir. Araç sonuç vermezse bunu açıkça söyle.
+- Önerdiğin influencer'ların profil linkini ver.
+- Yazdığın her paylaşım metnini (caption), senaryoyu veya brief'teki örnek metni kullanıcıya vermeden önce uyum_kontrol aracıyla denetle ve sorunları düzelt. Reklam içeriğinde metnin başında "Reklam" veya "Tanıtım" ibaresi ve reklam verenin adı olsun.
+- Sağlık beyanı (tedavi eder, zayıflatır vb.), kanıtsız "en iyi/en ucuz" iddiası ve çocuklara doğrudan satın alma çağrısı içeren metin yazma.
+- Hukuki konularda genel bilgi ver ama bunun hukuki görüş olmadığını belirt.
+- Telefon, e-posta, IBAN gibi kişisel verileri isteme ve paylaşma; bunlar platformda anlaşma onaylanınca paylaşılır (KVKK).
+- Kapsam dışı isteklere kibarca kısa cevap verip konuya dön.`;
+
+const MARKA = `${ORTAK}
+
+Şu an bir MARKA ile konuşuyorsun. Ona şu işlerde yardım et:
+1. Kampanya brief'i: hedef, hedef kitle, ana mesaj, içerik türleri ve adetleri, yapılacaklar/yapılmayacaklar, teslim takvimi, bütçe, başarı ölçütleri (erişim, etkileşim, kod/link ile satış). Eksik bilgi varsa en fazla 2-3 kısa soru sor, sonra makul varsayımlarla ilerle ve varsayımları belirt.
+2. Influencer bulma ve kısa liste: influencer_ara ile ara, neden uygun olduklarını açıkla. Mikro influencer'larda takipçi kadar kategori odağı ve doğrulama önemlidir.
+3. Bütçe planı: butce_plani ile hesapla; liste fiyatı olduğunu ve paket/pazarlık payını söyle.
+4. Teklif mesajı: influencer'a gönderilecek kısa, kişiselleştirilmiş teklif mesajı yaz (ücret, teslimatlar, tarih, revizyon, kullanım hakkı süresi).
+5. Fiyatın makul olup olmadığını fiyat_analizi ile değerlendir.`;
+
+const INFLUENCER = `${ORTAK}
+
+Şu an bir INFLUENCER (içerik üreticisi) ile konuşuyorsun. Ona şu işlerde yardım et:
+1. Profil iyileştirme: kullanıcı adını verirse profil_analizi ile eksikleri bul. Daha iyi bir "Hakkında" metni yaz (kitle, içerik tarzı, şehir, önceki iş birlikleri, 300 karakteri geçmesin).
+2. Fiyat belirleme: fiyat_analizi ile Reels/Gönderi/Hikâye/Video için bant öner. Paket fiyatı fikri ver (ör. 1 Reels + 3 Hikâye). Çok düşük fiyatın da güven kaybettirdiğini hatırlat.
+3. Teklif cevaplama ve pazarlık: gelen teklife nazik, net bir karşı teklif/kabul mesajı yaz. Anlaşma kartına yazılacakları (ücret, teslimatlar, teslim tarihi, revizyon sayısı, ödeme yöntemi ve zamanı, kullanım hakkı) madde madde çıkar.
+4. Kampanyalara başvuru: kampanya_listesi ile aktif kampanyaları göster ve kampanyaya uygun başvuru mesajı yaz.
+5. İçerik fikri ve caption: markaya uygun 3 içerik fikri (kanca + akış + kapanış) ve uyum_kontrol'den geçmiş caption yaz.`;
+
+const SISTEM = { marka: MARKA, influencer: INFLUENCER };
+
+const ORNEK_SORULAR = {
+  marka: [
+    "İzmir'de anne-çocuk alanında 20 bin TL bütçeyle Reels yaptırmak istiyorum, kimlerle çalışabilirim?",
+    "Lokum ve kahve markamız için Efsane Kasım kampanya brief'i hazırla.",
+    "Yemek kategorisinde doğrulanmış 5 influencer öner ve birine teklif mesajı yaz.",
+    "Şu caption uygun mu: \"Bu çay 1 haftada zayıflatıyor, piyasadaki en iyi çay! #işbirliği\"",
+  ],
+  influencer: [
+    "15 bin takipçim var, Moda & Güzellik alanındayım. Reels ve hikâye için ne kadar istemeliyim?",
+    "@omurdenoncel profilimi analiz et, neyi iyileştirmeliyim?",
+    "Aktif kampanyalara bak ve uygun olana başvuru mesajı yaz.",
+    "Bir marka 1 Reels için 1.500 ₺ teklif etti, 3 hikâye de istiyor. Nasıl cevap vereyim?",
+  ],
+};
+
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const tl = (n) => n == null ? "—" : n.toLocaleString("tr-TR") + " ₺";
+const kTakipci = (n) => n >= 1e6 ? (n / 1e6).toLocaleString("tr-TR", { maximumFractionDigits: 1 }) + " Mn" : n >= 1e3 ? Math.round(n / 1e3) + " B" : String(n);
+
+// --- Küçük, güvenli markdown (önce kaçış, sonra biçim) ---
+function satirIci(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<i>$2</i>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+}
+function md(metin) {
+  const satirlar = metin.replace(/\r/g, "").split("\n");
+  let html = "", liste = null, para = [], tablo = [];
+  const kapat = () => {
+    if (para.length) { html += "<p>" + para.map(satirIci).join("<br>") + "</p>"; para = []; }
+    if (liste) { html += `</${liste}>`; liste = null; }
+    if (tablo.length) {
+      const sat = tablo.filter((r) => !/^\s*\|?\s*:?-{2,}/.test(r)).map((r) => r.trim().replace(/^\||\|$/g, "").split("|").map((c) => satirIci(c.trim())));
+      html += '<div class="tablo-kap"><table>' + sat.map((r, i) => "<tr>" + r.map((c) => i ? `<td>${c}</td>` : `<th>${c}</th>`).join("") + "</tr>").join("") + "</table></div>";
+      tablo = [];
+    }
+  };
+  for (const s of satirlar) {
+    let m;
+    if (/^\s*\|.*\|\s*$/.test(s)) { if (para.length || liste) { const t = tablo; tablo = []; kapat(); tablo = t; } tablo.push(s); continue; }
+    if (tablo.length) kapat();
+    if (!s.trim()) { kapat(); continue; }
+    if ((m = s.match(/^#{1,4}\s+(.*)/))) { kapat(); html += `<h4>${satirIci(m[1])}</h4>`; continue; }
+    if ((m = s.match(/^\s*[-*•]\s+(.*)/)) || (m = s.match(/^\s*\d+[.)]\s+(.*)/))) {
+      const tur = /^\s*\d/.test(s) ? "ol" : "ul";
+      if (para.length) { html += "<p>" + para.map(satirIci).join("<br>") + "</p>"; para = []; }
+      if (liste !== tur) { if (liste) html += `</${liste}>`; html += `<${tur}>`; liste = tur; }
+      html += `<li>${satirIci(m[1])}</li>`; continue;
+    }
+    if (liste) { html += `</${liste}>`; liste = null; }
+    para.push(s);
+  }
+  kapat();
+  return html;
+}
+
+// --- Durum ---
+const durum = { rol: "marka", turlar: { marka: [], influencer: [] }, mesgul: false, ctl: null };
+
+function balon(tur, html) {
+  const d = document.createElement("div");
+  d.className = "balon " + tur;
+  d.innerHTML = html;
+  $("#akis").append(d);
+  $("#akis").scrollTop = $("#akis").scrollHeight;
+  return d;
+}
+function not(metin, hata = false) {
+  const d = document.createElement("div");
+  d.className = "not" + (hata ? " hata" : "");
+  d.textContent = metin;
+  $("#akis").append(d);
+  $("#akis").scrollTop = $("#akis").scrollHeight;
+}
+const KARSILAMA = {
+  marka: "Merhaba! Kampanya brief'i hazırlayabilir, bütçenize ve kategorinize uygun influencer'ları **isbirligim.com.tr verisinden** bulabilir, teklif mesajı yazabilir ve reklam metinlerinizi yönetmeliğe göre kontrol edebilirim. Aşağıdaki örneklerden biriyle başlayabilirsiniz.",
+  influencer: "Merhaba! Profilinizi analiz edip eksikleri gösterebilir, **benzer profillerin fiyatlarına** göre fiyat önerebilir, gelen teklife cevap ve aktif kampanyalara başvuru mesajı yazabilir, caption'larınızı reklam kurallarına göre kontrol edebilirim.",
+};
+function sohbetCiz() {
+  $("#akis").innerHTML = "";
+  balon("a", md(KARSILAMA[durum.rol]));
+  for (const t of durum.turlar[durum.rol]) balon(t.role === "user" ? "k" : "a", t.role === "user" ? esc(t.content) : md(t.content));
+  $("#oneriler").innerHTML = "";
+  for (const s of ORNEK_SORULAR[durum.rol]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = s;
+    b.onclick = () => { $("#girdi").value = s; gonder(); };
+    $("#oneriler").append(b);
+  }
+  $("#girdi").placeholder = durum.rol === "marka" ? "Örn. Ankara'da teknoloji alanında 10 bin TL ile kimlerle çalışabilirim?" : "Örn. 25 bin takipçim var, Reels için ne kadar istemeliyim?";
+}
+for (const b of document.querySelectorAll(".rol button")) {
+  b.onclick = () => {
+    if (durum.mesgul) return;
+    durum.rol = b.dataset.rol;
+    for (const x of document.querySelectorAll(".rol button")) x.setAttribute("aria-pressed", String(x === b));
+    try { localStorage.setItem("isb-rol", durum.rol); } catch {}
+    sohbetCiz();
+  };
+}
+
+// --- Araç izi ve kartlar ---
+let izBos = true;
+function izEkle(ad, girdi, hata) {
+  if (izBos) { $("#iz").innerHTML = ""; izBos = false; }
+  const ozet = Object.entries(girdi || {}).filter(([, v]) => v !== "" && v != null).map(([k, v]) => `${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`).join(", ");
+  const d = document.createElement("div");
+  d.className = "iz-satir";
+  d.innerHTML = `<span class="iz-ad">${esc(ad)}</span><span class="iz-girdi" title="${esc(ozet)}">${esc(hata ? "hata: " + hata : ozet || "—")}</span>`;
+  $("#iz").prepend(d);
+}
+function kartlarCiz(baslik, liste, fiyatAlani) {
+  $("#kart-baslik").textContent = baslik;
+  const k = $("#kartlar");
+  if (!liste?.length) { k.innerHTML = '<p class="bos">Bu ölçütlerle eşleşen profil çıkmadı.</p>'; return; }
+  k.innerHTML = liste.map((i) => {
+    const fiyat = fiyatAlani ? i.fiyat ?? i.fiyatlar?.[fiyatAlani] : (i.fiyatlar?.Reels ?? null);
+    return `<div class="kart">
+      <div class="avatar" aria-hidden="true">${esc((i.ad || "?").trim().charAt(0).toLocaleUpperCase("tr-TR"))}</div>
+      <div style="min-width:0">
+        <div class="kart-ad"><a href="${esc(i.profil_url)}" target="_blank" rel="noopener">${esc(i.ad)}</a> ${i.dogrulanmis ? '<span class="dog">✓ doğrulanmış</span>' : ""}</div>
+        <div class="kart-meta">@${esc(i.kullanici)} · ${esc([i.sehir, (i.kategoriler || []).slice(0, 2).join(", ")].filter(Boolean).join(" · "))}</div>
+      </div>
+      <div class="sayi">${kTakipci(i.takipci)}<small>${fiyat ? tl(fiyat) + " " + esc(fiyatAlani || "Reels") : "fiyat yok"}</small></div>
+    </div>`;
+  }).join("");
+}
+function aracSonucuGoster(ad, girdi, sonuc) {
+  if (!sonuc || sonuc.hata) return;
+  if (ad === "influencer_ara") kartlarCiz(`Bulunan influencer'lar · ${sonuc.toplam_eslesen} eşleşme`, sonuc.sonuclar, girdi?.icerik_turu);
+  if (ad === "butce_plani") kartlarCiz(`Bütçe planı · ${tl(sonuc.harcanan_tl)} / ${tl(sonuc.butce_tl)}`, sonuc.secilenler, sonuc.icerik_turu);
+  if (ad === "profil_analizi") kartlarCiz("Analiz edilen profil", [sonuc.profil]);
+}
+
+// --- Uyum kontrolü (LLM'siz) ---
+const SONUC_ADI = { uygun: "Uygun", duzeltilmeli: "Düzeltilmeli", riskli: "Riskli" };
+function uyumCiz() {
+  const r = uyumKontrol({ metin: $("#uyum-metin").value, reklam_veren: $("#uyum-marka").value, kategori: $("#uyum-kategori").value });
+  $("#uyum-sonuc").innerHTML = `<div class="sonuc-ust"><span class="rozet ${r.sonuc}">${SONUC_ADI[r.sonuc]}</span><span class="puan">${r.puan}/100</span></div>` +
+    (r.bulgular.length ? r.bulgular.map((b) => `<div class="bulgu ${b.seviye}"><b>${esc(b.aciklama)}</b><span>${esc(b.oneri)}</span></div>`).join("") : '<p class="bos">Kural ihlali bulunmadı.</p>');
+}
+for (const id of ["#uyum-metin", "#uyum-marka", "#uyum-kategori"]) $(id).addEventListener("input", uyumCiz);
+$("#uyum-kategori").value = "Fitness & Sağlık";
+uyumCiz();
+
+// --- Gönderme ---
+function mesgulOl(e) {
+  durum.mesgul = e;
+  $("#gonder").disabled = e; $("#girdi").disabled = e; $("#durdur").hidden = !e;
+  for (const b of document.querySelectorAll(".oneriler button, .rol button")) b.disabled = e;
+}
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); gonder(); });
+$("#girdi").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); gonder(); } });
+$("#durdur").onclick = () => durum.ctl?.abort();
+
+async function gonder() {
+  const mesaj = $("#girdi").value.trim();
+  if (!mesaj || durum.mesgul) return;
+  $("#girdi").value = "";
+  const rol = durum.rol, turlar = durum.turlar[rol];
+  turlar.push({ role: "user", content: mesaj });
+  balon("k", esc(mesaj));
+  const b = balon("a", '<span class="dusunuyor">Düşünüyor…</span>');
+  mesgulOl(true);
+  durum.ctl = new AbortController();
+  try {
+    const yanit = await MOTOR.sor({ rol, turlar, signal: durum.ctl.signal,
+      onText: (t) => { b.innerHTML = md(t); $("#akis").scrollTop = $("#akis").scrollHeight; },
+      onArac: (ad, girdi, sonuc) => { izEkle(ad, girdi, sonuc?.hata); aracSonucuGoster(ad, girdi, sonuc); } });
+    b.innerHTML = md(yanit);
+    turlar.push({ role: "assistant", content: yanit });
+  } catch (e) {
+    if (e?.text) { b.innerHTML = md(e.text); turlar.push({ role: "assistant", content: e.text }); } else { b.remove(); }
+    if (e?.code !== "cancelled") not(MOTOR.hataMetni(e), true);
+    if (!e?.text) turlar.pop();
+  } finally {
+    mesgulOl(false);
+    $("#girdi").focus();
+  }
+}
+
+// Motor: claude.ai yayınlanmış sayfa. Claude'u görüntüleyenin hesabıyla çağırır
+// (claude.use("sample")); araçlar sayfada, gömülü veriyle çalışır.
+const MOTOR = {
+  sample: null, araclarVar: false,
+  async baslat() {
+    $("#veri-ozet").textContent = `${VERI.influencerlar.length} profil · ${VERI.kampanyalar.length} aktif kampanya · veri ${VERI.cekilme}`;
+    let s = null;
+    try { s = await window.claude?.use?.("sample"); } catch {}
+    this.sample = s;
+    if (!s) {
+      not("Canlı yapay zekâ bu görünümde kullanılamıyor (sayfayı claude.ai'de açın). Reklam metni kontrolü burada da çalışır.", true);
+      $("#gonder").disabled = true;
+      return;
+    }
+    const lim = await s.limits().catch(() => null);
+    this.araclarVar = Boolean(lim?.tools);
+    if (!this.araclarVar) not("Bu görünümde araç kullanımı kapalı: asistan genel tavsiye verir, platform verisini çekemez.");
+  },
+  async sor({ rol, turlar, signal, onText, onArac }) {
+    if (!this.sample) throw { code: "yok" };
+    const ek = this.araclarVar
+      ? "Platform verisine yalnızca araçlarla eriş. Kullanıcının mesajları aşağıda."
+      : "Şu an araçlara erişimin yok: belirli influencer adı, fiyat veya kampanya verme; kullanıcıyı isbirligim.com.tr/influencers sayfasına yönlendir.";
+    const giris = [{ role: "user", content: SISTEM[rol] + "\n\n" + ek }, ...turlar.slice(-20)];
+    const tools = this.araclarVar ? rolAraclari(rol).map((a) => ({
+      name: a.name, description: a.description, inputSchema: a.input_schema,
+      execute: (input) => {
+        const r = aracCalistir(VERI, a.name, input);
+        onArac(a.name, input, r);
+        if (r?.hata) throw new Error(r.hata);
+        return r;
+      },
+    })) : undefined;
+    const { text, truncated } = await this.sample(giris, { signal, tools, ...(tools ? {} : { cache: false }), onText: ({ text }) => onText(text) });
+    return truncated ? text + "\n\n*(Yanıt uzunluk sınırında kesildi; daha dar bir soru sorun.)*" : text;
+  },
+  hataMetni(e) {
+    return ({
+      not_granted: "Bu sayfanın Claude'u kullanmasına izin verilmedi. Sayfayı yenileyip izin verebilirsiniz.",
+      sampling_disabled: "Claude bu hesapta kullanılamıyor.",
+      rate_limited: "Kullanım sınırına ulaşıldı. Biraz sonra tekrar deneyin.",
+      session_expired: "Oturumunuz kapanmış; claude.ai'ye yeniden giriş yapın.",
+      refused: "Claude bu isteği yanıtlamadı. Soruyu farklı biçimde yazın.",
+      empty_completion: "Boş yanıt geldi. Soruyu biraz daha açık yazın.",
+      prompt_too_large: "Sohbet çok uzadı. Rolü değiştirip geri dönerek yeni sohbet başlatın.",
+      tools_unavailable: "Bu görünümde araç kullanımı yok.",
+      yok: "Canlı yapay zekâ yalnızca sayfa claude.ai içinde açıldığında çalışır.",
+    })[e?.code] ?? "Yapay zekâ servisine ulaşılamadı. Tekrar deneyin.";
+  },
+};
+
+
+try { const r = localStorage.getItem("isb-rol"); if (r === "influencer") $("#rol-influencer").click(); } catch {}
+sohbetCiz();
+MOTOR.baslat?.();
+</script>

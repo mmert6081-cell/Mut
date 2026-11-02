@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}</style>
+</head>
+<body>
+<title>İşbirliğim Asistan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Düzen: üstte rol anahtarı; geniş ekranda solda sohbet, sağda "masa" (araç izi + bulunanlar + metin kontrolü); dar ekranda alt alta. */
+:root {
+  --bg: #f7f6fb; --panel: #ffffff; --ink: #1d1a2b; --muted: #6b6680; --line: #e4e1ee;
+  --accent: #6d28d9; --accent-ink: #ffffff; --accent-soft: #efe8fc;
+  --ok: #157f4a; --ok-soft: #e3f4ea; --warn: #9a5b00; --warn-soft: #fbf0dc; --bad: #b42335; --bad-soft: #fbe5e8;
+  --user: #1d1a2b; --user-ink: #f7f6fb;
+  --f-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #13111b; --panel: #1c1928; --ink: #ece9f5; --muted: #a29cb8; --line: #2e2a3f;
+  --accent: #a78bfa; --accent-ink: #160f2b; --accent-soft: #2a2145;
+  --ok: #5fd39a; --ok-soft: #173327; --warn: #f0b85a; --warn-soft: #3a2c12; --bad: #ff8a98; --bad-soft: #3c1820;
+  --user: #ece9f5; --user-ink: #13111b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #13111b; --panel: #1c1928; --ink: #ece9f5; --muted: #a29cb8; --line: #2e2a3f;
+  --accent: #a78bfa; --accent-ink: #160f2b; --accent-soft: #2a2145;
+  --ok: #5fd39a; --ok-soft: #173327; --warn: #f0b85a; --warn-soft: #3a2c12; --bad: #ff8a98; --bad-soft: #3c1820;
+  --user: #ece9f5; --user-ink: #13111b; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.sayfa { max-width: 1240px; margin: 0 auto; padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.marka-adi { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+h1 { font: 700 1.6rem/1.1 var(--f-display); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h1 b { color: var(--accent); font-weight: 700; }
+.alt { color: var(--muted); font-size: .9rem; }
+.rol { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.rol button { border: 0; background: transparent; color: var(--muted); font: 600 .92rem var(--f-body); padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+.rol button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.izgara { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 880px) { .izgara { grid-template-columns: minmax(0, 1fr); } }
+
+.sohbet { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; min-height: 560px; min-width: 0; }
+.akis { flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 68vh; min-height: 320px; }
+.balon { max-width: 88%; padding: 10px 14px; border-radius: 14px; min-width: 0; overflow-wrap: anywhere; }
+.balon.k { align-self: flex-end; background: var(--user); color: var(--user-ink); border-bottom-right-radius: 4px; white-space: pre-wrap; }
+.balon.a { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.balon.a p { margin: 0 0 .6em } .balon.a p:last-child { margin: 0 }
+.balon.a ul, .balon.a ol { margin: .2em 0 .7em; padding-left: 1.3em } .balon.a li { margin: .15em 0 }
+.balon.a h3, .balon.a h4 { font: 600 1rem var(--f-display); margin: .8em 0 .3em }
+.balon.a a { color: var(--accent); }
+.balon.a code { font: .85em var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+.balon.a table { border-collapse: collapse; font-size: .88rem; margin: .4em 0 } .balon.a td, .balon.a th { border: 1px solid var(--line); padding: 4px 8px; text-align: left }
+.tablo-kap { overflow-x: auto; max-width: 100%; }
+.dusunuyor { color: var(--muted); font-style: italic; }
+.not { align-self: center; font-size: .82rem; color: var(--muted); text-align: center; max-width: 52ch; }
+.not.hata { color: var(--bad); }
+
+.oneriler { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 12px; }
+.oneriler button { font: 500 .85rem var(--f-body); color: var(--ink); background: var(--accent-soft); border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; text-align: left; }
+.oneriler button:hover { filter: brightness(0.97); }
+form.yaz { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); align-items: flex-end; }
+form.yaz textarea { flex: 1; min-width: 0; resize: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: var(--r); padding: 10px 12px; font: 15px/1.4 var(--f-body); max-height: 160px; }
+.btn { border: 0; border-radius: var(--r); padding: 10px 16px; font: 600 .92rem var(--f-body); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn.ikincil { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.masa { display: grid; gap: 14px; min-width: 0; }
+.kutu { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+.kutu h2 { font: 600 .78rem var(--f-body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; }
+.iz { display: grid; gap: 6px; font-size: .86rem; }
+.iz-satir { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.iz-ad { font: 500 .8rem var(--f-mono); color: var(--accent); white-space: nowrap; }
+.iz-girdi { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.bos { color: var(--muted); font-size: .88rem; margin: 0; }
+
+.kartlar { display: grid; gap: 8px; }
+.kart { display: grid; grid-template-columns: 38px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.kart:first-child { border-top: 0; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 .95rem var(--f-display); background: var(--accent-soft); color: var(--accent); }
+.kart-ad { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kart-ad a { color: inherit; text-decoration: none; } .kart-ad a:hover { text-decoration: underline; }
+.kart-meta { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dog { color: var(--ok); font-size: .78rem; font-weight: 600; }
+.sayi { font: 500 .82rem var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.sayi small { display: block; color: var(--muted); font-family: var(--f-body); font-size: .72rem; }
+
+.uyum textarea, .uyum input, .uyum select { width: 100%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: var(--r); padding: 9px 11px; font: 14px/1.45 var(--f-body); }
+.uyum textarea { min-height: 92px; resize: vertical; }
+.uyum .satir { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; } .uyum .satir > * { flex: 1 1 140px; }
+.sonuc-ust { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; }
+.rozet { font: 600 .78rem var(--f-body); padding: 3px 10px; border-radius: 999px; }
+.rozet.uygun { background: var(--ok-soft); color: var(--ok); } .rozet.duzeltilmeli { background: var(--warn-soft); color: var(--warn); } .rozet.riskli { background: var(--bad-soft); color: var(--bad); }
+.puan { font: 500 .85rem var(--f-mono); color: var(--muted); }
+.bulgu { border-left: 3px solid var(--line); padding: 4px 0 4px 10px; margin: 8px 0; font-size: .86rem; }
+.bulgu.hata { border-color: var(--bad); } .bulgu.uyari { border-color: var(--warn); } .bulgu.bilgi { border-color: var(--accent); }
+.bulgu b { display: block; } .bulgu span { color: var(--muted); }
+.dipnot { font-size: .75rem; color: var(--muted); margin: 8px 0 0; }
+.durum { font-size: .82rem; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .balon { animation: gel .18s ease-out; } @keyframes gel { from { transform: translateY(4px); opacity: .6 } } }
+</style>
+
+<div class="sayfa">
+  <header>
+    <div class="marka-adi">
+      <h1>İşbirliğim <b>Asistan</b></h1>
+      <span class="alt" id="veri-ozet"></span>
+    </div>
+    <div class="rol" role="group" aria-label="Kimsiniz?">
+      <button type="button" id="rol-marka" data-rol="marka" aria-pressed="true">Markayım</button>
+      <button type="button" id="rol-influencer" data-rol="influencer" aria-pressed="false">Influencer'ım</button>
+    </div>
+  </header>
+
+  <div class="izgara">
+    <section class="sohbet" aria-label="Sohbet">
+      <div class="akis" id="akis" aria-live="polite"></div>
+      <div class="oneriler" id="oneriler"></div>
+      <form class="yaz" id="form">
+        <textarea id="girdi" rows="2" maxlength="4000" placeholder="Sorunuzu yazın…" aria-label="Mesaj"></textarea>
+        <button class="btn ikincil" type="button" id="durdur" hidden>Durdur</button>
+        <button class="btn" type="submit" id="gonder">Gönder</button>
+      </form>
+    </section>
+
+    <aside class="masa">
+      <div class="kutu">
+        <h2>Asistanın çalıştırdığı araçlar</h2>
+        <div class="iz" id="iz"><p class="bos">Asistan veri çektikçe burada görünecek.</p></div>
+      </div>
+      <div class="kutu">
+        <h2 id="kart-baslik">Bulunan influencer'lar</h2>
+        <div class="kartlar" id="kartlar"><p class="bos">Asistan bir arama veya bütçe planı yaptığında profiller burada listelenir.</p></div>
+      </div>
+      <div class="kutu uyum">
+        <h2>Reklam metni kontrolü</h2>
+        <textarea id="uyum-metin" aria-label="Paylaşım metni">Bu çay 1 haftada zayıflatıyor, piyasadaki en iyi çay! İndirim kodu: CAY20 #işbirliği</textarea>
+        <div class="satir">
+          <input id="uyum-marka" placeholder="Marka adı (isteğe bağlı)" aria-label="Marka adı" value="Çaykur Bitki">
+          <select id="uyum-kategori" aria-label="Kategori">
+            <option value="">Kategori seçin</option>
+            <option>Fitness & Sağlık</option><option>Moda & Güzellik</option><option>Yemek & Mutfak</option>
+            <option>Anne & Çocuk</option><option>Yaşam & Lifestyle</option><option>Teknoloji</option>
+          </select>
+        </div>
+        <div id="uyum-sonuc"></div>
+        <p class="dipnot">Yapay zekâ kullanmaz, anında çalışır. Yönetmelik md. 23/A'ya göre ön kontroldür, hukuki görüş değildir.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+// Influencer reklam metni uyum kontrolü (deterministik, LLM'siz).
+// Dayanak: Ticari Reklam ve Haksız Ticari Uygulamalar Yönetmeliği md. 23/A
+// (RG 01.07.2026 / 33297, yürürlük 01.08.2026) ve Ticaret Bakanlığı
+// "Sosyal Medya Etkileyicileri Tarafından Yapılan Ticari Reklam" kılavuzu.
+// Bu kontrol bir ön elemedir; hukuki görüş yerine geçmez.
+
+const kucuk = (s) => String(s ?? "").toLocaleLowerCase("tr-TR");
+const katla = (s) => s.replace(/[çğıöşüâî]/g, (c) => ({ ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u", â: "a", î: "i" })[c]);
+
+const SAGLIK_KALIPLARI = [
+  /tedavi (eder|ediyor|etti)/, /iyileştir/, /şifa/, /zayıflat/, /kilo verdir/, /kilo kaybettir/,
+  /yağ yak/, /selülit(i)? (yok|bitir)/, /hastalığ?[ıa] (karşı|iyi)/, /kanser/, /diyabet/, /tansiyon/,
+  /bağışıklığ?[ıi] (güçlendir|artır)/, /detoks/, /ilaç gibi/, /ağrıyı? (geçir|keser|bitir)/,
+  /mucize/, /\bkesin sonuç/, /garantili sonuç/, /yan etkisi? (yok|olmayan)/,
+];
+const USTUNLUK_KALIPLARI = [/\ben iyi(si)?\b/, /\ben ucuz(u)?\b/, /1 numara/, /bir numara/, /rakipsiz/, /piyasadaki tek/, /\ben kaliteli/];
+const COCUK_CAGRI = [/annene (söyle|aldır)/, /babana (söyle|aldır)/, /ailene aldır/, /hemen (al|satın al)/, /kaçırma/];
+const YZ_ANMA = /(yapay zek[aâ]|\bai\b|\byz\b)/;
+const YZ_BEYAN = /(yapay zek[aâ] (ile|kullanılarak) (üretil|oluşturul|düzenlen)|#yapayzeka|#yz\b|#aigenerated)/;
+const ZAYIF_ETIKET = /(#?i[sş] ?birli[gğ]i|#?sponsorlu|#ad\b|#?gifted|#?hediye)/;
+const GUCLU_ETIKET = /(#reklam\b|#tan[ıi]t[ıi]m\b|\breklam\b|\btan[ıi]t[ıi]m\b)/;
+const INDIRIM = /(%\s?\d+|\d+\s?%)\s*(indirim|i̇ndirim)|indirim kodu/;
+
+/**
+ * @param {{metin:string, kategori?:string, reklam_veren?:string}} girdi
+ * @returns {{sonuc:"uygun"|"duzeltilmeli"|"riskli", puan:number, bulgular:Array<{seviye:"hata"|"uyari"|"bilgi", kural:string, aciklama:string, oneri:string}>, not:string}}
+ */
+function uyumKontrol(girdi) {
+  const metin = String(girdi?.metin ?? "");
+  const m = kucuk(metin);
+  const kategori = kucuk(girdi?.kategori);
+  const bulgular = [];
+  const ekle = (seviye, kural, aciklama, oneri) => bulgular.push({ seviye, kural, aciklama, oneri });
+
+  if (!metin.trim()) {
+    return { sonuc: "duzeltilmeli", puan: 0, bulgular: [{ seviye: "hata", kural: "bos_metin", aciklama: "Kontrol edilecek metin boş.", oneri: "Paylaşım metnini (caption) girin." }], not: NOT };
+  }
+
+  // 1) Reklam ibaresi
+  const guclu = m.match(GUCLU_ETIKET);
+  if (!guclu) {
+    if (ZAYIF_ETIKET.test(m)) {
+      ekle("uyari", "reklam_ibaresi", "Yalnızca \"iş birliği/sponsorlu\" gibi bir ibare var. 1 Ağustos 2026 düzenlemesiyle \"Reklam\" veya \"Tanıtım\" ibaresi açıkça aranıyor.",
+        "Metnin başına \"Reklam\" veya \"#reklam\" ekleyin.");
+    } else {
+      ekle("hata", "reklam_ibaresi", "Ücretli/karşılıklı paylaşımda reklam olduğunu belirten ibare yok.",
+        "Metnin ilk satırına \"Reklam | @marka\" veya \"#reklam\" ekleyin.");
+    }
+  } else if (guclu.index > 125) {
+    ekle("uyari", "reklam_ibaresi_konumu", "Reklam ibaresi metnin sonlarında; \"devamını gör\" altında kalabilir.",
+      "İbareyi ilk satıra, kesilmeden görünecek yere taşıyın.");
+  }
+
+  // 2) Reklam verenin adı
+  const rv = kucuk(girdi?.reklam_veren).trim();
+  if (rv) {
+    const sade = katla(rv).replace(/[^a-z0-9]/g, "");
+    if (!katla(m).replace(/[^a-z0-9]/g, "").includes(sade)) {
+      ekle("uyari", "reklam_veren", `Reklam verenin adı (${girdi.reklam_veren}) metinde geçmiyor.`,
+        `\"Reklam | @${sade}\" biçiminde reklam vereni etiketleyin.`);
+    }
+  }
+
+  // 3) Sağlık beyanı
+  const saglik = SAGLIK_KALIPLARI.filter((r) => r.test(m)).map((r) => m.match(r)[0]);
+  if (saglik.length) {
+    const fitness = /fitness|sağlık|güzellik|anne/.test(kategori);
+    ekle(fitness ? "hata" : "uyari", "saglik_beyani",
+      `Sağlık beyanı sayılabilecek ifade(ler): ${[...new Set(saglik)].join(", ")}. Influencer'ların mevzuata aykırı sağlık beyanı yapması yasak.`,
+      "Tedavi/iyileştirme/zayıflatma vaadi yerine kişisel deneyim ve ürünün onaylı özelliklerini anlatın (\"bana iyi geldi\" değil, \"rutinimde kullanıyorum\").");
+  }
+
+  // 4) Üstünlük / karşılaştırma iddiası
+  const ust = USTUNLUK_KALIPLARI.filter((r) => r.test(m)).map((r) => m.match(r)[0]);
+  if (ust.length) {
+    ekle("uyari", "ustunluk_iddiasi", `Kanıtlanması gereken üstünlük iddiası: ${[...new Set(ust)].join(", ")}.`,
+      "Belgelenemiyorsa \"en çok sevdiğim\", \"benim favorim\" gibi öznel ifade kullanın.");
+  }
+
+  // 5) Yapay zekâ
+  if (YZ_ANMA.test(m) && !YZ_BEYAN.test(m)) {
+    ekle("bilgi", "yapay_zeka", "Metin yapay zekâdan söz ediyor. Görsel/ses/metin yapay zekâyla üretildiyse bu açıkça belirtilmeli.",
+      "Gerekiyorsa \"Bu görsel yapay zekâ ile oluşturulmuştur.\" ekleyin.");
+  }
+
+  // 6) Çocuklar
+  const cocukBaglam = /anne|çocuk/.test(kategori) || /çocuk|bebek|minik|okul/.test(m);
+  if (cocukBaglam) {
+    const cagri = COCUK_CAGRI.filter((r) => r.test(m)).map((r) => m.match(r)[0]);
+    if (cagri.length) {
+      ekle("hata", "cocuk_dogrudan_cagri", `Çocuklara doğrudan satın alma çağrısı gibi okunabilecek ifade: ${[...new Set(cagri)].join(", ")}.`,
+        "Çağrıyı ebeveyne yönelik ve bilgilendirici yapın; çocukları ebeveynlerini ikna etmeye yönlendirmeyin.");
+    } else {
+      ekle("bilgi", "cocuk_hassasiyet", "Çocukların yer aldığı/hedeflendiği içerik: kişisel veriyle çocuklara hedefli reklam yasak ve çocukların deneyimsizliği istismar edilmemeli.",
+        "Çocuğun yüzünü/bilgisini paylaşmadan önce veli rızasını ve KVKK'yı gözetin.");
+    }
+  }
+
+  // 7) İndirim
+  if (INDIRIM.test(m) && !/(geçerli|son gün|tarih|kadar)/.test(m)) {
+    ekle("bilgi", "indirim_kosullari", "İndirim/kod var ama süre veya koşul belirtilmemiş.",
+      "\"…tarihine kadar geçerli\" gibi süre ve koşulu ekleyin.");
+  }
+
+  const hata = bulgular.filter((b) => b.seviye === "hata").length;
+  const uyari = bulgular.filter((b) => b.seviye === "uyari").length;
+  const puan = Math.max(0, 100 - hata * 35 - uyari * 12 - (bulgular.length - hata - uyari) * 3);
+  const sonuc = hata ? "riskli" : uyari ? "duzeltilmeli" : "uygun";
+  return { sonuc, puan, bulgular, not: NOT };
+}
+
+const NOT = "Otomatik ön kontroldür, hukuki görüş değildir. Güncel metin: Ticari Reklam ve Haksız Ticari Uygulamalar Yönetmeliği md. 23/A (RG 33297).";
+
+// Asistanın kullandığı araçlar. Saf fonksiyonlar: veri parametreyle gelir,
+// hem Node sunucusunda hem tarayıcıda (demo) aynen çalışır.
+
+
+const SITE = "https://isbirligim.com.tr";
+const ICERIK_TURLERI = ["Reels", "Gönderi", "Hikâye", "Video"];
+// Sitede bazı profiller "1 ₺", "3 ₺" gibi (muhtemelen "bin ₺" kastıyla) fiyat girmiş.
+// Bunlar hesaplamaları bozmasın diye bu eşiğin altı geçersiz sayılır.
+const MIN_GECERLI_FIYAT = 100;
+const gf = (inf) => Object.fromEntries(Object.entries(inf.fiyatlar ?? {}).filter(([, v]) => v >= MIN_GECERLI_FIYAT));
+const supheli = (inf) => Object.entries(inf.fiyatlar ?? {}).filter(([, v]) => v < MIN_GECERLI_FIYAT).map(([k]) => k);
+
+const sade = (s) => String(s ?? "").toLocaleLowerCase("tr-TR")
+  .replace(/[çğıöşüâî]/g, (c) => ({ ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u", â: "a", î: "i" })[c])
+  .replace(/&/g, " ").replace(/\s+/g, " ").trim();
+const icerikTuru = (t) => {
+  const s = sade(t);
+  if (!s) return null;
+  if (s.startsWith("reel")) return "Reels";
+  if (s.startsWith("gon") || s.startsWith("post")) return "Gönderi";
+  if (s.startsWith("hik") || s.startsWith("story")) return "Hikâye";
+  if (s.startsWith("vid") || s.startsWith("youtube")) return "Video";
+  return null;
+};
+const kategoriEsles = (aranan, kategoriler) => {
+  const a = sade(aranan);
+  if (!a) return true;
+  return kategoriler.some((k) => sade(k).includes(a) || a.includes(sade(k).split(" ")[0]));
+};
+const yuzdelik = (dizi, p) => {
+  if (!dizi.length) return null;
+  const s = [...dizi].sort((x, y) => x - y);
+  const i = (s.length - 1) * p, a = Math.floor(i), b = Math.ceil(i);
+  return Math.round(s[a] + (s[b] - s[a]) * (i - a));
+};
+const kademe = (takipci) => takipci < 10_000 ? 0 : takipci < 50_000 ? 1 : takipci < 100_000 ? 2 : 3;
+const KADEME_ADI = ["10 binin altı (nano/mikro)", "10–50 bin (mikro)", "50–100 bin (orta)", "100 bin ve üzeri"];
+const rehberAlani = { Reels: "reels", "Gönderi": "gonderi", "Hikâye": "hikaye" };
+const kisa = (inf) => ({
+  id: inf.id, ad: inf.ad, kullanici: inf.kullanici, kategoriler: inf.kategoriler, sehir: inf.sehir || null,
+  takipci: inf.takipci, platform: inf.platform, dogrulanmis: inf.dogrulanmis, fiyatlar: gf(inf),
+  ...(supheli(inf).length ? { gecersiz_fiyat: supheli(inf) } : {}),
+  profil_url: `${SITE}/influencer/${inf.id}`,
+});
+
+/** Filtrele + puanla. Puan: kategori odağı, şehir, doğrulama, fiyat bilgisi, bütçeye uygunluk, anahtar kelime. */
+function influencerAra(veri, g = {}) {
+  const tur = icerikTuru(g.icerik_turu);
+  const limit = Math.min(Math.max(Number(g.limit) || 8, 1), 20);
+  const maxFiyat = Number(g.max_fiyat) || null;
+  const kelimeler = sade(g.anahtar_kelime).split(" ").filter((k) => k.length > 2);
+  const adaylar = veri.influencerlar.filter((inf) => {
+    if (g.kategori && !kategoriEsles(g.kategori, inf.kategoriler)) return false;
+    if (g.sehir && sade(inf.sehir) !== sade(g.sehir)) return false;
+    if (g.min_takipci && inf.takipci < Number(g.min_takipci)) return false;
+    if (g.max_takipci && inf.takipci > Number(g.max_takipci)) return false;
+    if (g.platform && !inf.platform.some((p) => sade(p) === sade(g.platform))) return false;
+    if (g.sadece_dogrulanmis && !inf.dogrulanmis) return false;
+    if (maxFiyat && tur && !(gf(inf)[tur] <= maxFiyat)) return false;
+    return true;
+  });
+  const sonuclar = adaylar.map((inf) => {
+    let puan = 0; const neden = [];
+    if (g.kategori) {
+      const odak = 1 / Math.max(inf.kategoriler.length, 1);
+      puan += 20 + 20 * odak;
+      if (inf.kategoriler.length <= 2) neden.push("kategoriye odaklı");
+    }
+    if (g.sehir) { puan += 15; neden.push(`${inf.sehir}'da`); }
+    if (inf.dogrulanmis) { puan += 15; neden.push("doğrulanmış hesap"); }
+    if (Object.keys(gf(inf)).length) puan += 10; else neden.push("geçerli fiyat girmemiş");
+    if (tur && gf(inf)[tur]) {
+      const tlBin = gf(inf)[tur] / Math.max(inf.takipci / 1000, 1);
+      puan += Math.max(0, 15 - tlBin); // 1000 takipçi başına ucuz olana artı
+    }
+    if (kelimeler.length) {
+      const h = sade(inf.hakkinda + " " + inf.ad + " " + inf.kullanici);
+      const isabet = kelimeler.filter((k) => h.includes(k)).length;
+      if (isabet) { puan += 10 * isabet; neden.push("profil açıklaması eşleşiyor"); }
+    }
+    puan += Math.min(10, Math.log10(Math.max(inf.takipci, 1)) * 2);
+    return { ...kisa(inf), uygunluk_puani: Math.round(puan), neden };
+  });
+  const sirala = g.sirala === "takipci" ? (a, b) => b.takipci - a.takipci
+    : g.sirala === "fiyat" && tur ? (a, b) => (a.fiyatlar[tur] ?? 1e12) - (b.fiyatlar[tur] ?? 1e12)
+    : (a, b) => b.uygunluk_puani - a.uygunluk_puani || b.takipci - a.takipci;
+  sonuclar.sort(sirala);
+  return { toplam_eslesen: sonuclar.length, gosterilen: Math.min(limit, sonuclar.length), sonuclar: sonuclar.slice(0, limit),
+    not: "Takipçi sayıları influencer beyanıdır; 'doğrulanmış' olanlar platformca kontrol edilmiştir. Fiyatlar liste fiyatıdır, pazarlığa açıktır." };
+}
+
+/** Bir takipçi/kategori/içerik türü için fiyat bandı: site rehberi + benzer profillerin dağılımı. */
+function fiyatAnalizi(veri, g = {}) {
+  const takipci = Number(g.takipci) || 0;
+  const turler = icerikTuru(g.icerik_turu) ? [icerikTuru(g.icerik_turu)] : ICERIK_TURLERI;
+  const k = kademe(takipci);
+  const kademeSatir = veri.fiyatRehberi.takipciyeGore[k] ?? null;
+  const katSatir = g.kategori ? veri.fiyatRehberi.kategoriyeGore.find((r) => kategoriEsles(g.kategori, [r.ad])) ?? null : null;
+  const benzer = veri.influencerlar.filter((i) => kademe(i.takipci) === k && (!g.kategori || kategoriEsles(g.kategori, i.kategoriler)));
+  const sonuc = {};
+  for (const t of turler) {
+    const fiyatlar = benzer.map((i) => gf(i)[t]).filter(Boolean);
+    const p25 = yuzdelik(fiyatlar, 0.25), p50 = yuzdelik(fiyatlar, 0.5), p75 = yuzdelik(fiyatlar, 0.75);
+    const rehber = [kademeSatir?.[rehberAlani[t]], katSatir?.[rehberAlani[t]]].filter(Boolean);
+    const rehberOrt = rehber.length ? Math.round(rehber.reduce((a, b) => a + b, 0) / rehber.length) : null;
+    const merkez = p50 && rehberOrt ? Math.round((p50 + rehberOrt) / 2) : p50 ?? rehberOrt;
+    const yuvarla = (x) => (x == null ? null : Math.round(x / 250) * 250);
+    sonuc[t] = {
+      onerilen_alt: merkez == null ? null : yuvarla(Math.min(p25 ?? merkez * 0.75, merkez * 0.85)),
+      onerilen: yuvarla(merkez),
+      onerilen_ust: merkez == null ? null : yuvarla(Math.max(p75 ?? merkez * 1.3, merkez * 1.2)),
+      benzer_profil_sayisi: fiyatlar.length,
+      benzer_ortanca: p50, rehber_kademe_ortancasi: kademeSatir?.[rehberAlani[t]] ?? null,
+      rehber_kategori_ortancasi: katSatir?.[rehberAlani[t]] ?? null,
+      bin_takipci_basina_tl: merkez && takipci ? Math.round((merkez / (takipci / 1000)) * 10) / 10 : null,
+    };
+  }
+  return { takipci_kademesi: KADEME_ADI[k], kategori: katSatir?.ad ?? g.kategori ?? null, icerik: sonuc,
+    rehber_tarihi: veri.fiyatRehberi.tarih,
+    not: "Rehber, influencer'ların kendi girdiği fiyatların ortancasıdır; gerçekleşen işlem fiyatı değildir. Video için site rehberinde satır yok, yalnız benzer profiller kullanıldı." };
+}
+
+/** Bütçeye göre influencer karması (açgözlü: TL başına erişimi en yüksek olandan başlar, çeşitliliği korur). */
+function butcePlani(veri, g = {}) {
+  const butce = Number(g.butce_tl) || 0;
+  const tur = icerikTuru(g.icerik_turu) ?? "Reels";
+  if (butce <= 0) throw new Error("butce_tl pozitif bir sayı olmalı");
+  const fiyat = (i) => gf(i)[tur];
+  const adaylar = veri.influencerlar.filter((i) => fiyat(i) > 0 && i.takipci > 0
+    && (!g.kategori || kategoriEsles(g.kategori, i.kategoriler))
+    && (!g.sehir || sade(i.sehir) === sade(g.sehir))
+    && (!g.sadece_dogrulanmis || i.dogrulanmis)
+    && (!g.min_takipci || i.takipci >= Number(g.min_takipci)));
+  const maxKisi = Math.min(Number(g.max_kisi) || 10, 25);
+  const hedef = g.hedef === "cesitlilik" ? "cesitlilik" : "erisim";
+  const deger = (i) => hedef === "erisim" ? i.takipci / fiyat(i) : (1 / fiyat(i)) * (i.dogrulanmis ? 1.5 : 1);
+  const sirali = [...adaylar].sort((a, b) => deger(b) - deger(a));
+  const secilen = []; let kalan = butce;
+  for (const i of sirali) {
+    if (secilen.length >= maxKisi) break;
+    if (fiyat(i) <= kalan) { secilen.push(i); kalan -= fiyat(i); }
+  }
+  const toplamTakipci = secilen.reduce((a, i) => a + i.takipci, 0);
+  return {
+    icerik_turu: tur, butce_tl: butce, harcanan_tl: butce - kalan, kalan_tl: kalan, aday_sayisi: adaylar.length,
+    toplam_takipci: toplamTakipci,
+    bin_takipci_basina_tl: toplamTakipci ? Math.round(((butce - kalan) / (toplamTakipci / 1000)) * 10) / 10 : null,
+    secilenler: secilen.map((i) => ({ ...kisa(i), fiyat: fiyat(i) })),
+    not: "Toplam takipçi = toplam erişim değildir (kitle örtüşmesi, etkileşim oranı). Liste fiyatlarıyla hesaplandı; paket/pazarlıkla düşebilir.",
+  };
+}
+
+/** Bir influencer profilini değerlendirir: eksikler, fiyat konumu, rekabet. */
+function profilAnalizi(veri, g = {}) {
+  const ara = sade(g.kullanici ?? g.id ?? g.ad).replace(/^@/, "");
+  if (!ara) throw new Error("kullanici, id veya ad verin");
+  const inf = veri.influencerlar.find((i) => i.id === g.id || sade(i.kullanici) === ara)
+    ?? veri.influencerlar.find((i) => sade(i.ad) === ara || sade(i.kullanici).includes(ara) || sade(i.ad).includes(ara));
+  if (!inf) throw new Error(`'${g.kullanici ?? g.id ?? g.ad}' bulunamadı. Profil sitede dolu değilse listede yer almaz.`);
+  const eksikler = [];
+  const sup = supheli(inf);
+  if (sup.length) eksikler.push(`${sup.join(", ")} fiyatı ${MIN_GECERLI_FIYAT} ₺'nin altında (${sup.map((k) => inf.fiyatlar[k] + " ₺").join(", ")}): büyük olasılıkla hatalı girildi; markalar ciddiye almaz, düzeltin.`);
+  if (!Object.keys(inf.fiyatlar).length) eksikler.push("Fiyat girilmemiş: markalar bütçe filtresinde bu profili göremez.");
+  else for (const t of ICERIK_TURLERI) if (!inf.fiyatlar[t]) eksikler.push(`${t} fiyatı yok.`);
+  if (!inf.sehir) eksikler.push("Şehir yok: yerel kampanya aramalarında çıkmaz.");
+  if ((inf.hakkinda ?? "").length < 60) eksikler.push("'Hakkında' çok kısa: kitle, içerik tarzı ve önceki iş birliklerini yazın.");
+  if (!inf.dogrulanmis) eksikler.push("Hesap doğrulanmamış: doğrulama, aramada öne çıkarır ve güven verir.");
+  if (inf.kategoriler.length > 4) eksikler.push(`${inf.kategoriler.length} kategori seçilmiş: 2-3 ana kategoriye inmek uzmanlık algısını artırır.`);
+  if (inf.platform.length < 2) eksikler.push("Tek platform: TikTok/YouTube varsa ekleyin (paket teklif fırsatı).");
+  const fa = fiyatAnalizi(veri, { takipci: inf.takipci, kategori: inf.kategoriler[0] });
+  const konum = {};
+  for (const [t, f] of Object.entries(gf(inf))) {
+    const b = fa.icerik[t];
+    if (!b?.onerilen) continue;
+    konum[t] = { fiyatin: f, piyasa_bandi: [b.onerilen_alt, b.onerilen_ust],
+      durum: f < b.onerilen_alt ? "piyasanın altında" : f > b.onerilen_ust ? "piyasanın üstünde" : "piyasa bandında" };
+  }
+  const rakip = veri.influencerlar.filter((i) => i.id !== inf.id && kademe(i.takipci) === kademe(inf.takipci)
+    && i.kategoriler.some((k) => inf.kategoriler.includes(k))).length;
+  return { profil: { ...kisa(inf), hakkinda: inf.hakkinda }, eksikler, fiyat_konumu: konum, takipci_kademesi: fa.takipci_kademesi,
+    ayni_kademe_ve_kategoride_rakip: rakip };
+}
+
+function kampanyaListesi(veri, g = {}) {
+  const k = veri.kampanyalar.filter((c) => !g.kategori || sade(c.aciklama + c.baslik).includes(sade(g.kategori)));
+  return { aktif_kampanya: k.length, kampanyalar: k.map((c) => ({ ...c, url: `${SITE}/kampanya/${c.id}` })) };
+}
+
+// ---- Araç tanımları (Claude tool şeması) ----
+const S = (properties, required = []) => ({ type: "object", properties, required, additionalProperties: false });
+const str = (description, extra = {}) => ({ type: "string", description, ...extra });
+const num = (description) => ({ type: "number", description });
+const TUR = str("İçerik türü", { enum: ICERIK_TURLERI });
+
+const ARACLAR = [
+  { name: "influencer_ara", roller: ["marka"], calistir: influencerAra,
+    description: "isbirligim.com.tr'deki profili dolu influencer'ları filtreler ve uygunluğa göre sıralar. Ad, kullanıcı adı, kategori, şehir, takipçi, doğrulama, fiyatlar ve profil linkini döndürür. Influencer önerirken HER ZAMAN bunu kullan; isim uydurma.",
+    input_schema: S({ kategori: str("Örn. 'Yemek & Mutfak', 'Anne & Çocuk', 'Fitness'"), sehir: str("Örn. 'İstanbul'"),
+      min_takipci: num("En az takipçi"), max_takipci: num("En çok takipçi"), icerik_turu: TUR, max_fiyat: num("Seçilen içerik türü için en yüksek fiyat (TL)"),
+      platform: str("instagram, tiktok, youtube"), sadece_dogrulanmis: { type: "boolean" }, anahtar_kelime: str("Profil açıklamasında aranacak kelimeler"),
+      sirala: str("Sıralama", { enum: ["uygunluk", "takipci", "fiyat"] }), limit: num("1-20, varsayılan 8") }) },
+  { name: "butce_plani", roller: ["marka"], calistir: butcePlani,
+    description: "Verilen bütçeyle hangi influencer'larla çalışılabileceğini hesaplar (liste fiyatlarıyla). Seçilenleri, harcanan/kalan tutarı ve toplam takipçiyi döndürür.",
+    input_schema: S({ butce_tl: num("Toplam bütçe (TL)"), icerik_turu: TUR, kategori: str("Kategori"), sehir: str("Şehir"),
+      hedef: str("erisim: TL başına en çok takipçi; cesitlilik: daha çok sayıda küçük hesap", { enum: ["erisim", "cesitlilik"] }),
+      sadece_dogrulanmis: { type: "boolean" }, min_takipci: num("En az takipçi"), max_kisi: num("En çok kaç influencer (varsayılan 10)") }, ["butce_tl"]) },
+  { name: "fiyat_analizi", roller: ["marka", "influencer"], calistir: fiyatAnalizi,
+    description: "Takipçi sayısı ve kategoriye göre içerik türü başına önerilen fiyat bandını (alt/önerilen/üst TL) site fiyat rehberi ve benzer profillerden hesaplar.",
+    input_schema: S({ takipci: num("Takipçi sayısı"), kategori: str("Kategori"), icerik_turu: TUR }, ["takipci"]) },
+  { name: "profil_analizi", roller: ["influencer", "marka"], calistir: profilAnalizi,
+    description: "Sitedeki bir influencer profilini kullanıcı adı/ad ile bulur; eksiklerini, fiyatlarının piyasaya göre konumunu ve rakip sayısını döndürür.",
+    input_schema: S({ kullanici: str("Instagram kullanıcı adı (@ olmadan) veya profil adı"), id: str("Profil id (varsa)") }) },
+  { name: "kampanya_listesi", roller: ["influencer", "marka"], calistir: kampanyaListesi,
+    description: "Sitedeki aktif kampanyaları (başlık, marka, açıklama, link) listeler.",
+    input_schema: S({ kategori: str("İsteğe bağlı kategori filtresi") }) },
+  { name: "uyum_kontrol", roller: ["marka", "influencer"], calistir: (_veri, g) => uyumKontrol(g),
+    description: "Bir paylaşım metnini/brief'i Türkiye influencer reklam kurallarına (Reklam/Tanıtım ibaresi, sağlık beyanı, üstünlük iddiası, çocuk, yapay zekâ, indirim) göre denetler. Yazdığın HER caption/örnek paylaşım metnini son haline getirmeden önce bununla kontrol et.",
+    input_schema: S({ metin: str("Kontrol edilecek metin"), kategori: str("Kategori"), reklam_veren: str("Marka adı") }, ["metin"]) },
+];
+
+const rolAraclari = (rol) => ARACLAR.filter((a) => a.roller.includes(rol));
+
+/** Aracı çalıştırır; hata olursa {hata} döndürür (modele geri iletilir). */
+function aracCalistir(veri, ad, girdi) {
+  const a = ARACLAR.find((x) => x.name === ad);
+  if (!a) return { hata: `Bilinmeyen araç: ${ad}` };
+  try { return a.calistir(veri, girdi && typeof girdi === "object" ? girdi : {}); }
+  catch (e) { return { hata: String(e?.message ?? e) }; }
+}
+
+// İki rol için sistem talimatları. Sabit metinler: önbelleğe alınabilmesi
+// için içine tarih/saat gibi değişken bilgi koymayın.
+
+const ORTAK = `Sen isbirligim.com.tr'nin yapay zekâ asistanısın. isbirligim.com.tr, markaları mikro influencer'larla buluşturan Türkçe bir platformdur.
+
+Platform nasıl çalışır (kullanıcıya bu çerçevede yol göster):
+- Markalar kampanya açar ya da beğendiği influencer'a doğrudan teklif gönderir.
+- Influencer bir anlaşma kartı gönderir: ücret, teslimatlar (Reels/Gönderi/Hikâye/Video), teslim tarihi, dahil revizyon sayısı, ödeme yöntemi.
+- Kart onaylanınca iletişim bilgileri paylaşılır; ödeme ve fatura taraflar arasında yapılır. Platform ücret veya komisyon almaz.
+- Profillerde takipçi sayısı influencer beyanıdır; "doğrulanmış" rozeti platformun sahiplik ve takipçi kontrolü yaptığını gösterir.
+
+Çalışma kuralların:
+- Her zaman Türkçe, samimi ama profesyonel yaz. Kısa paragraflar ve maddeler kullan. Para birimini "5.000 ₺" biçiminde yaz.
+- Influencer adı, takipçi, fiyat, kampanya gibi platform verisini ASLA uydurma: araçlarla getir. Araç sonuç vermezse bunu açıkça söyle.
+- Önerdiğin influencer'ların profil linkini ver.
+- Yazdığın her paylaşım metnini (caption), senaryoyu veya brief'teki örnek metni kullanıcıya vermeden önce uyum_kontrol aracıyla denetle ve sorunları düzelt. Reklam içeriğinde metnin başında "Reklam" veya "Tanıtım" ibaresi ve reklam verenin adı olsun.
+- Sağlık beyanı (tedavi eder, zayıflatır vb.), kanıtsız "en iyi/en ucuz" iddiası ve çocuklara doğrudan satın alma çağrısı içeren metin yazma.
+- Hukuki konularda genel bilgi ver ama bunun hukuki görüş olmadığını belirt.
+- Telefon, e-posta, IBAN gibi kişisel verileri isteme ve paylaşma; bunlar platformda anlaşma onaylanınca paylaşılır (KVKK).
+- Kapsam dışı isteklere kibarca kısa cevap verip konuya dön.`;
+
+const MARKA = `${ORTAK}
+
+Şu an bir MARKA ile konuşuyorsun. Ona şu işlerde yardım et:
+1. Kampanya brief'i: hedef, hedef kitle, ana mesaj, içerik türleri ve adetleri, yapılacaklar/yapılmayacaklar, teslim takvimi, bütçe, başarı ölçütleri (erişim, etkileşim, kod/link ile satış). Eksik bilgi varsa en fazla 2-3 kısa soru sor, sonra makul varsayımlarla ilerle ve varsayımları belirt.
+2. Influencer bulma ve kısa liste: influencer_ara ile ara, neden uygun olduklarını açıkla. Mikro influencer'larda takipçi kadar kategori odağı ve doğrulama önemlidir.
+3. Bütçe planı: butce_plani ile hesapla; liste fiyatı olduğunu ve paket/pazarlık payını söyle.
+4. Teklif mesajı: influencer'a gönderilecek kısa, kişiselleştirilmiş teklif mesajı yaz (ücret, teslimatlar, tarih, revizyon, kullanım hakkı süresi).
+5. Fiyatın makul olup olmadığını fiyat_analizi ile değerlendir.`;
+
+const INFLUENCER = `${ORTAK}
+
+Şu an bir INFLUENCER (içerik üreticisi) ile konuşuyorsun. Ona şu işlerde yardım et:
+1. Profil iyileştirme: kullanıcı adını verirse profil_analizi ile eksikleri bul. Daha iyi bir "Hakkında" metni yaz (kitle, içerik tarzı, şehir, önceki iş birlikleri, 300 karakteri geçmesin).
+2. Fiyat belirleme: fiyat_analizi ile Reels/Gönderi/Hikâye/Video için bant öner. Paket fiyatı fikri ver (ör. 1 Reels + 3 Hikâye). Çok düşük fiyatın da güven kaybettirdiğini hatırlat.
+3. Teklif cevaplama ve pazarlık: gelen teklife nazik, net bir karşı teklif/kabul mesajı yaz. Anlaşma kartına yazılacakları (ücret, teslimatlar, teslim tarihi, revizyon sayısı, ödeme yöntemi ve zamanı, kullanım hakkı) madde madde çıkar.
+4. Kampanyalara başvuru: kampanya_listesi ile aktif kampanyaları göster ve kampanyaya uygun başvuru mesajı yaz.
+5. İçerik fikri ve caption: markaya uygun 3 içerik fikri (kanca + akış + kapanış) ve uyum_kontrol'den geçmiş caption yaz.`;
+
+const SISTEM = { marka: MARKA, influencer: INFLUENCER };
+
+const ORNEK_SORULAR = {
+  marka: [
+    "İzmir'de anne-çocuk alanında 20 bin TL bütçeyle Reels yaptırmak istiyorum, kimlerle çalışabilirim?",
+    "Lokum ve kahve markamız için Efsane Kasım kampanya brief'i hazırla.",
+    "Yemek kategorisinde doğrulanmış 5 influencer öner ve birine teklif mesajı yaz.",
+    "Şu caption uygun mu: \"Bu çay 1 haftada zayıflatıyor, piyasadaki en iyi çay! #işbirliği\"",
+  ],
+  influencer: [
+    "15 bin takipçim var, Moda & Güzellik alanındayım. Reels ve hikâye için ne kadar istemeliyim?",
+    "@omurdenoncel profilimi analiz et, neyi iyileştirmeliyim?",
+    "Aktif kampanyalara bak ve uygun olana başvuru mesajı yaz.",
+    "Bir marka 1 Reels için 1.500 ₺ teklif etti, 3 hikâye de istiyor. Nasıl cevap vereyim?",
+  ],
+};
+
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const tl = (n) => n == null ? "—" : n.toLocaleString("tr-TR") + " ₺";
+const kTakipci = (n) => n >= 1e6 ? (n / 1e6).toLocaleString("tr-TR", { maximumFractionDigits: 1 }) + " Mn" : n >= 1e3 ? Math.round(n / 1e3) + " B" : String(n);
+
+// --- Küçük, güvenli markdown (önce kaçış, sonra biçim) ---
+function satirIci(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<i>$2</i>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+}
+function md(metin) {
+  const satirlar = metin.replace(/\r/g, "").split("\n");
+  let html = "", liste = null, para = [], tablo = [];
+  const kapat = () => {
+    if (para.length) { html += "<p>" + para.map(satirIci).join("<br>") + "</p>"; para = []; }
+    if (liste) { html += `</${liste}>`; liste = null; }
+    if (tablo.length) {
+      const sat = tablo.filter((r) => !/^\s*\|?\s*:?-{2,}/.test(r)).map((r) => r.trim().replace(/^\||\|$/g, "").split("|").map((c) => satirIci(c.trim())));
+      html += '<div class="tablo-kap"><table>' + sat.map((r, i) => "<tr>" + r.map((c) => i ? `<td>${c}</td>` : `<th>${c}</th>`).join("") + "</tr>").join("") + "</table></div>";
+      tablo = [];
+    }
+  };
+  for (const s of satirlar) {
+    let m;
+    if (/^\s*\|.*\|\s*$/.test(s)) { if (para.length || liste) { const t = tablo; tablo = []; kapat(); tablo = t; } tablo.push(s); continue; }
+    if (tablo.length) kapat();
+    if (!s.trim()) { kapat(); continue; }
+    if ((m = s.match(/^#{1,4}\s+(.*)/))) { kapat(); html += `<h4>${satirIci(m[1])}</h4>`; continue; }
+    if ((m = s.match(/^\s*[-*•]\s+(.*)/)) || (m = s.match(/^\s*\d+[.)]\s+(.*)/))) {
+      const tur = /^\s*\d/.test(s) ? "ol" : "ul";
+      if (para.length) { html += "<p>" + para.map(satirIci).join("<br>") + "</p>"; para = []; }
+      if (liste !== tur) { if (liste) html += `</${liste}>`; html += `<${tur}>`; liste = tur; }
+      html += `<li>${satirIci(m[1])}</li>`; continue;
+    }
+    if (liste) { html += `</${liste}>`; liste = null; }
+    para.push(s);
+  }
+  kapat();
+  return html;
+}
+
+// --- Durum ---
+const durum = { rol: "marka", turlar: { marka: [], influencer: [] }, mesgul: false, ctl: null };
+
+function balon(tur, html) {
+  const d = document.createElement("div");
+  d.className = "balon " + tur;
+  d.innerHTML = html;
+  $("#akis").append(d);
+  $("#akis").scrollTop = $("#akis").scrollHeight;
+  return d;
+}
+function not(metin, hata = false) {
+  const d = document.createElement("div");
+  d.className = "not" + (hata ? " hata" : "");
+  d.textContent = metin;
+  $("#akis").append(d);
+  $("#akis").scrollTop = $("#akis").scrollHeight;
+}
+const KARSILAMA = {
+  marka: "Merhaba! Kampanya brief'i hazırlayabilir, bütçenize ve kategorinize uygun influencer'ları **isbirligim.com.tr verisinden** bulabilir, teklif mesajı yazabilir ve reklam metinlerinizi yönetmeliğe göre kontrol edebilirim. Aşağıdaki örneklerden biriyle başlayabilirsiniz.",
+  influencer: "Merhaba! Profilinizi analiz edip eksikleri gösterebilir, **benzer profillerin fiyatlarına** göre fiyat önerebilir, gelen teklife cevap ve aktif kampanyalara başvuru mesajı yazabilir, caption'larınızı reklam kurallarına göre kontrol edebilirim.",
+};
+function sohbetCiz() {
+  $("#akis").innerHTML = "";
+  balon("a", md(KARSILAMA[durum.rol]));
+  for (const t of durum.turlar[durum.rol]) balon(t.role === "user" ? "k" : "a", t.role === "user" ? esc(t.content) : md(t.content));
+  $("#oneriler").innerHTML = "";
+  for (const s of ORNEK_SORULAR[durum.rol]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = s;
+    b.onclick = () => { $("#girdi").value = s; gonder(); };
+    $("#oneriler").append(b);
+  }
+  $("#girdi").placeholder = durum.rol === "marka" ? "Örn. Ankara'da teknoloji alanında 10 bin TL ile kimlerle çalışabilirim?" : "Örn. 25 bin takipçim var, Reels için ne kadar istemeliyim?";
+}
+for (const b of document.querySelectorAll(".rol button")) {
+  b.onclick = () => {
+    if (durum.mesgul) return;
+    durum.rol = b.dataset.rol;
+    for (const x of document.querySelectorAll(".rol button")) x.setAttribute("aria-pressed", String(x === b));
+    try { localStorage.setItem("isb-rol", durum.rol); } catch {}
+    sohbetCiz();
+  };
+}
+
+// --- Araç izi ve kartlar ---
+let izBos = true;
+function izEkle(ad, girdi, hata) {
+  if (izBos) { $("#iz").innerHTML = ""; izBos = false; }
+  const ozet = Object.entries(girdi || {}).filter(([, v]) => v !== "" && v != null).map(([k, v]) => `${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`).join(", ");
+  const d = document.createElement("div");
+  d.className = "iz-satir";
+  d.innerHTML = `<span class="iz-ad">${esc(ad)}</span><span class="iz-girdi" title="${esc(ozet)}">${esc(hata ? "hata: " + hata : ozet || "—")}</span>`;
+  $("#iz").prepend(d);
+}
+function kartlarCiz(baslik, liste, fiyatAlani) {
+  $("#kart-baslik").textContent = baslik;
+  const k = $("#kartlar");
+  if (!liste?.length) { k.innerHTML = '<p class="bos">Bu ölçütlerle eşleşen profil çıkmadı.</p>'; return; }
+  k.innerHTML = liste.map((i) => {
+    const fiyat = fiyatAlani ? i.fiyat ?? i.fiyatlar?.[fiyatAlani] : (i.fiyatlar?.Reels ?? null);
+    return `<div class="kart">
+      <div class="avatar" aria-hidden="true">${esc((i.ad || "?").trim().charAt(0).toLocaleUpperCase("tr-TR"))}</div>
+      <div style="min-width:0">
+        <div class="kart-ad"><a href="${esc(i.profil_url)}" target="_blank" rel="noopener">${esc(i.ad)}</a> ${i.dogrulanmis ? '<span class="dog">✓ doğrulanmış</span>' : ""}</div>
+        <div class="kart-meta">@${esc(i.kullanici)} · ${esc([i.sehir, (i.kategoriler || []).slice(0, 2).join(", ")].filter(Boolean).join(" · "))}</div>
+      </div>
+      <div class="sayi">${kTakipci(i.takipci)}<small>${fiyat ? tl(fiyat) + " " + esc(fiyatAlani || "Reels") : "fiyat yok"}</small></div>
+    </div>`;
+  }).join("");
+}
+function aracSonucuGoster(ad, girdi, sonuc) {
+  if (!sonuc || sonuc.hata) return;
+  if (ad === "influencer_ara") kartlarCiz(`Bulunan influencer'lar · ${sonuc.toplam_eslesen} eşleşme`, sonuc.sonuclar, girdi?.icerik_turu);
+  if (ad === "butce_plani") kartlarCiz(`Bütçe planı · ${tl(sonuc.harcanan_tl)} / ${tl(sonuc.butce_tl)}`, sonuc.secilenler, sonuc.icerik_turu);
+  if (ad === "profil_analizi") kartlarCiz("Analiz edilen profil", [sonuc.profil]);
+}
+
+// --- Uyum kontrolü (LLM'siz) ---
+const SONUC_ADI = { uygun: "Uygun", duzeltilmeli: "Düzeltilmeli", riskli: "Riskli" };
+function uyumCiz() {
+  const r = uyumKontrol({ metin: $("#uyum-metin").value, reklam_veren: $("#uyum-marka").value, kategori: $("#uyum-kategori").value });
+  $("#uyum-sonuc").innerHTML = `<div class="sonuc-ust"><span class="rozet ${r.sonuc}">${SONUC_ADI[r.sonuc]}</span><span class="puan">${r.puan}/100</span></div>` +
+    (r.bulgular.length ? r.bulgular.map((b) => `<div class="bulgu ${b.seviye}"><b>${esc(b.aciklama)}</b><span>${esc(b.oneri)}</span></div>`).join("") : '<p class="bos">Kural ihlali bulunmadı.</p>');
+}
+for (const id of ["#uyum-metin", "#uyum-marka", "#uyum-kategori"]) $(id).addEventListener("input", uyumCiz);
+$("#uyum-kategori").value = "Fitness & Sağlık";
+uyumCiz();
+
+// --- Gönderme ---
+function mesgulOl(e) {
+  durum.mesgul = e;
+  $("#gonder").disabled = e; $("#girdi").disabled = e; $("#durdur").hidden = !e;
+  for (const b of document.querySelectorAll(".oneriler button, .rol button")) b.disabled = e;
+}
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); gonder(); });
+$("#girdi").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); gonder(); } });
+$("#durdur").onclick = () => durum.ctl?.abort();
+
+async function gonder() {
+  const mesaj = $("#girdi").value.trim();
+  if (!mesaj || durum.mesgul) return;
+  $("#girdi").value = "";
+  const rol = durum.rol, turlar = durum.turlar[rol];
+  turlar.push({ role: "user", content: mesaj });
+  balon("k", esc(mesaj));
+  const b = balon("a", '<span class="dusunuyor">Düşünüyor…</span>');
+  mesgulOl(true);
+  durum.ctl = new AbortController();
+  try {
+    const yanit = await MOTOR.sor({ rol, turlar, signal: durum.ctl.signal,
+      onText: (t) => { b.innerHTML = md(t); $("#akis").scrollTop = $("#akis").scrollHeight; },
+      onArac: (ad, girdi, sonuc) => { izEkle(ad, girdi, sonuc?.hata); aracSonucuGoster(ad, girdi, sonuc); } });
+    b.innerHTML = md(yanit);
+    turlar.push({ role: "assistant", content: yanit });
+  } catch (e) {
+    if (e?.text) { b.innerHTML = md(e.text); turlar.push({ role: "assistant", content: e.text }); } else { b.remove(); }
+    if (e?.code !== "cancelled") not(MOTOR.hataMetni(e), true);
+    if (!e?.text) turlar.pop();
+  } finally {
+    mesgulOl(false);
+    $("#girdi").focus();
+  }
+}
+
+// Motor: kendi Node sunucumuz (src/sunucu.js). Araçlar ve Claude çağrısı sunucuda.
+const MOTOR = {
+  oturum: { marka: null, influencer: null },
+  async baslat() {
+    try {
+      const s = await (await fetch("/api/saglik")).json();
+      $("#veri-ozet").textContent = `${s.influencer} profil · veri ${s.veri_tarihi}`;
+      if (!s.llm) not("Sunucuda ANTHROPIC_API_KEY tanımlı değil: sohbet çalışmaz, reklam metni kontrolü çalışır.", true);
+    } catch { not("Sunucuya ulaşılamadı.", true); }
+  },
+  async sor({ rol, turlar, signal, onArac }) {
+    let r;
+    try {
+      r = await fetch("/api/asistan", { method: "POST", headers: { "content-type": "application/json" }, signal,
+        body: JSON.stringify({ rol, mesaj: turlar.at(-1).content, oturum: this.oturum[rol] }) });
+    } catch (e) { throw e?.name === "AbortError" ? { code: "cancelled" } : { code: "ag", message: "Sunucuya ulaşılamadı." }; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw { code: "http", message: j.hata || `Sunucu hatası (${r.status})` };
+    this.oturum[rol] = j.oturum;
+    for (const a of j.araclar ?? []) onArac(a.ad, a.girdi, a.sonuc ?? (a.hata ? { hata: a.hata } : null));
+    return j.yanit;
+  },
+  hataMetni(e) { return e?.message || "Bir hata oluştu."; },
+};
+
+
+try { const r = localStorage.getItem("isb-rol"); if (r === "influencer") $("#rol-influencer").click(); } catch {}
+sohbetCiz();
+MOTOR.baslat?.();
+</script>
+
+</body>
+</html>

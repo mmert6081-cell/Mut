@@ -1,0 +1,17 @@
+{
+  "name": "isbirligim-ai-asistan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "isbirligim.com.tr için marka ve influencer yapay zekâ asistanı (Claude + araç kullanımı)",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/sunucu.js",
+    "test": "node --test test/*.test.js",
+    "veri": "node scripts/veri-guncelle.mjs",
+    "demo": "node scripts/demo-olustur.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0"
+  }
+}
