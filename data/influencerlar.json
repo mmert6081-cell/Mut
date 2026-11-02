@@ -772,7 +772,7 @@
   {
    "id": "79c8dbed-3f1d-4249-b0d8-a041c9d96d9f",
    "ad": "Esra koçak",
-   "kullanici": "_unanne",
+   "kullanici": "isbirligim.com.tr/@unanne",
    "kategoriler": [
     "Yemek & Mutfak",
     "Anne & Çocuk"
@@ -3367,6 +3367,26 @@
     "Hikâye": 10,
     "Video": 6
    }
+  },
+  {
+   "id": "84bebeb9-6d22-4cf8-b8da-18731b7bb716",
+   "ad": "Nalan aydın",
+   "kullanici": "nalan_ozbaki_aydin",
+   "kategoriler": [
+    "Moda & Güzellik",
+    "Anne & Çocuk",
+    "Eğitim",
+    "Seyahat",
+    "Teknoloji"
+   ],
+   "sehir": "Kocaeli",
+   "takipci": 1000,
+   "platform": [
+    "instagram"
+   ],
+   "dogrulanmis": true,
+   "hakkinda": "Çocuk gelişimi mezunuyum 2 ve 6 yaşında 2 kızım var evliyim şuan çalışmıyorum",
+   "fiyatlar": {}
   },
   {
    "id": "e92cc6dd-0218-4fd2-bfad-488e00e1fb69",

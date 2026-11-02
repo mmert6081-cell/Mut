@@ -5,7 +5,7 @@
  "takipciyeGore": [
   {
    "ad": "10 binin altı (nano/mikro)",
-   "adet": 243,
+   "adet": 244,
    "reels": 1000,
    "gonderi": 1000,
    "hikaye": 500
@@ -77,10 +77,10 @@
   },
   {
    "ad": "Eğitim",
-   "adet": 80,
-   "reels": 1750,
+   "adet": 81,
+   "reels": 2000,
    "gonderi": 1000,
-   "hikaye": 600
+   "hikaye": 700
   },
   {
    "ad": "Teknoloji",
